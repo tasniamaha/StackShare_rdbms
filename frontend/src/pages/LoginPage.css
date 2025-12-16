@@ -1,0 +1,133 @@
+/* ===== PAGE BACKGROUND ===== */
+.login-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f7f1ff, #e6d9ff);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ===== LOGO SECTION ===== */
+.logo-section {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.logo {
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, #8b5cf6, #ec4899);
+  color: white;
+  font-weight: bold;
+  font-size: 22px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 10px;
+}
+
+.logo-section h1 {
+  margin: 0;
+  font-size: 26px;
+  color: #8b5cf6;
+}
+
+.logo-section p {
+  margin: 4px 0 0;
+  color: #555;
+}
+
+/* ===== CARD ===== */
+.login-card {
+  background: white;
+  width: 420px;
+  padding: 30px;
+  border-radius: 24px;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
+}
+
+/* ===== TABS (THIS IS THE FIX) ===== */
+.tab-buttons {
+  background: #f1f1f1;
+  border-radius: 14px;
+  padding: 6px;
+  display: flex;
+  margin-bottom: 20px;
+}
+
+.tab {
+  flex: 1;
+  border: none;
+  padding: 12px 0;
+  font-size: 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  background: transparent;
+  color: #555;
+}
+
+.tab.active {
+  background: linear-gradient(135deg, #8b5cf6, #ec4899);
+  color: white;
+  box-shadow: 0 6px 16px rgba(139, 92, 246, 0.4);
+}
+
+.tab.inactive {
+  background: transparent;
+  color: #555;
+}
+
+/* ===== INPUTS ===== */
+.login-card input {
+  width: 100%;
+  padding: 14px;
+  margin-bottom: 14px;
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  font-size: 15px;
+}
+
+.login-card input:focus {
+  outline: none;
+  border-color: #8b5cf6;
+}
+
+/* ===== BUTTONS ===== */
+.login-btn {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 14px;
+  font-size: 16px;
+  color: white;
+  cursor: pointer;
+  background: linear-gradient(135deg, #8b5cf6, #ec4899);
+  margin-top: 10px;
+}
+
+.iut-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 14px;
+  border: 2px solid #8b5cf6;
+  background: transparent;
+  color: #8b5cf6;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+/* ===== MISC ===== */
+.or {
+  text-align: center;
+  margin: 16px 0;
+  color: #777;
+}
+
+.login-message {
+  margin-top: 10px;
+  color: green;
+  text-align: center;
+}
+
