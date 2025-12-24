@@ -1,133 +1,127 @@
-/* ===== PAGE BACKGROUND ===== */
-.login-page {
+.auth-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #f7f1ff, #e6d9ff);
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
 }
 
-/* ===== LOGO SECTION ===== */
-.logo-section {
-  text-align: center;
-  margin-bottom: 30px;
+.auth-wrapper {
+  width: 100%;
+  max-width: 420px;
+  background: white;
+  border-radius: 20px;
+  padding: 32px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
 }
 
 .logo {
-  width: 64px;
-  height: 64px;
-  background: linear-gradient(135deg, #8b5cf6, #ec4899);
-  color: white;
-  font-weight: bold;
-  font-size: 22px;
-  border-radius: 18px;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  margin: 0 auto 10px;
-}
-
-.logo-section h1 {
-  margin: 0;
-  font-size: 26px;
-  color: #8b5cf6;
-}
-
-.logo-section p {
-  margin: 4px 0 0;
-  color: #555;
-}
-
-/* ===== CARD ===== */
-.login-card {
-  background: white;
-  width: 420px;
-  padding: 30px;
-  border-radius: 24px;
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
-}
-
-/* ===== TABS (THIS IS THE FIX) ===== */
-.tab-buttons {
-  background: #f1f1f1;
-  border-radius: 14px;
-  padding: 6px;
-  display: flex;
   margin-bottom: 20px;
 }
 
-.tab {
+.logo-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #8b5cf6, #ec4899);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.logo h1 {
+  margin-top: 12px;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.logo p {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+/* Tabs */
+.auth-tabs {
+  display: flex;
+  background: #f3f4f6;
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 24px;
+}
+
+.auth-tabs button {
   flex: 1;
   border: none;
-  padding: 12px 0;
-  font-size: 16px;
-  border-radius: 12px;
-  cursor: pointer;
   background: transparent;
-  color: #555;
+  padding: 10px 0;
+  border-radius: 10px;
+  font-size: 14px;
+  cursor: pointer;
 }
 
-.tab.active {
+.auth-tabs .active {
   background: linear-gradient(135deg, #8b5cf6, #ec4899);
   color: white;
-  box-shadow: 0 6px 16px rgba(139, 92, 246, 0.4);
 }
 
-.tab.inactive {
-  background: transparent;
-  color: #555;
+/* Inputs */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
-/* ===== INPUTS ===== */
-.login-card input {
+.auth-form input {
   width: 100%;
-  padding: 14px;
-  margin-bottom: 14px;
+  padding: 12px 14px;
   border-radius: 12px;
-  border: 1px solid #ddd;
-  font-size: 15px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
 }
 
-.login-card input:focus {
+.auth-form input:focus {
   outline: none;
   border-color: #8b5cf6;
 }
 
-/* ===== BUTTONS ===== */
-.login-btn {
-  width: 100%;
-  padding: 14px;
-  border: none;
-  border-radius: 14px;
-  font-size: 16px;
-  color: white;
-  cursor: pointer;
-  background: linear-gradient(135deg, #8b5cf6, #ec4899);
-  margin-top: 10px;
-}
-
-.iut-btn {
-  width: 100%;
-  padding: 14px;
-  border-radius: 14px;
-  border: 2px solid #8b5cf6;
-  background: transparent;
+/* Actions */
+.forgot {
+  text-align: right;
+  font-size: 13px;
   color: #8b5cf6;
-  font-size: 16px;
   cursor: pointer;
 }
 
-/* ===== MISC ===== */
-.or {
+.primary-btn {
+  margin-top: 10px;
+  padding: 14px;
+  border-radius: 14px;
+  border: none;
+  font-size: 15px;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, #8b5cf6, #ec4899);
+  cursor: pointer;
+}
+
+.divider {
   text-align: center;
   margin: 16px 0;
-  color: #777;
+  font-size: 13px;
+  color: #6b7280;
 }
 
-.login-message {
-  margin-top: 10px;
-  color: green;
-  text-align: center;
+.secondary-btn {
+  padding: 12px;
+  border-radius: 14px;
+  background: white;
+  border: 2px solid #8b5cf6;
+  color: #8b5cf6;
+  font-weight: 500;
+  cursor: pointer;
 }
-
