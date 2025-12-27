@@ -1,0 +1,147 @@
+/* Page background */
+.auth-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f172a, #020617);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  color: white;
+  overflow: hidden;
+}
+
+/* Header */
+.auth-header {
+  position: absolute;
+  top: 40px;
+  text-align: center;
+  z-index: 2;
+}
+
+.logo-circle {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #a855f7, #ec4899);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 20px;
+  margin: 0 auto 10px;
+}
+
+.auth-header h1 {
+  margin: 0;
+  font-size: 26px;
+}
+
+.auth-header p {
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+/* Floating balls */
+.ball {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(40px);
+  opacity: 0.9;
+}
+
+.ball.purple {
+  width: 220px;
+  height: 220px;
+  background: #9333ea;
+  top: 20%;
+  left: 10%;
+}
+
+.ball.blue {
+  width: 260px;
+  height: 260px;
+  background: #38bdf8;
+  top: 10%;
+  right: 15%;
+}
+
+.ball.pink {
+  width: 240px;
+  height: 240px;
+  background: #ec4899;
+  bottom: 15%;
+  right: 25%;
+}
+
+/* Login card */
+.login-card {
+  width: 380px;
+  padding: 30px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
+  z-index: 2;
+  text-align: center;
+}
+
+.login-card h2 {
+  margin-bottom: 20px;
+}
+
+/* Inputs */
+.input-group {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 14px;
+}
+
+.input-group .icon {
+  margin-right: 10px;
+}
+
+.input-group input {
+  background: none;
+  border: none;
+  outline: none;
+  color: white;
+  width: 100%;
+  font-size: 14px;
+}
+
+/* Forgot */
+.forgot {
+  text-align: right;
+  font-size: 12px;
+  margin-bottom: 20px;
+  opacity: 0.85;
+  cursor: pointer;
+}
+
+/* Login button */
+.login-btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 30px;
+  border: none;
+  font-size: 16px;
+  color: white;
+  cursor: pointer;
+  background: linear-gradient(135deg, #a855f7, #ec4899);
+  margin-bottom: 15px;
+}
+
+/* Switch text */
+.switch-text {
+  font-size: 13px;
+  opacity: 0.85;
+}
+
+.switch-text span {
+  color: #38bdf8;
+  cursor: pointer;
+}
+
