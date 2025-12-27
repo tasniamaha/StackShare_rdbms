@@ -1,0 +1,29 @@
+{
+  "name": "stackshare",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tasniamaha/StackShare_rdbms.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tasniamaha/StackShare_rdbms/issues"
+  },
+  "homepage": "https://github.com/tasniamaha/StackShare_rdbms#readme",
+  "description": "",
+  "dependencies": {
+    "body-parser": "^2.2.1",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "mysql2": "^3.16.0",
+    "sequelize": "^6.37.7"
+  }
+}

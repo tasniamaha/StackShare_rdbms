@@ -41,7 +41,8 @@ create table borrow_requests (
 
     request_date date not null,
 
-    approval_status varchar(20) default 'Pending' check (approval_status in ('Pending','Approved','Rejected','Borrowed','Returned','Cancelled')),
+    approval_status ENUM('Pending','Approved','Rejected') DEFAULT 'Pending',
+    borrow_status ENUM('NotStarted','Borrowed','Returned','Overdue') DEFAULT 'NotStarted',
 
     approved_by varchar(10),
     approved_at datetime,
@@ -82,7 +83,7 @@ create table return_logs(
     condition_status varchar(20) not null,
     remarks text,
 
-    foreign key (borrow_id) references borrow_requests(borrow_id) on delete cascade
+    foreign key (borrow_id) references borrow_requests(borrow_id) on delete cascade,
     foreign key (device_id) references devices(device_id) on delete cascade
 );
 
