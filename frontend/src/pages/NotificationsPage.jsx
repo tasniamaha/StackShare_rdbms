@@ -1,20 +1,17 @@
 import "./NotificationsPage.css";
 
-function NotificationsPage() {
+export default function NotificationsPage() {
   const notifications = [
     {
-      id: 1,
-      text: "New emergency post: Phone lost near library",
+      title: "New emergency post: Phone lost near library",
       time: "2 minutes ago",
     },
     {
-      id: 2,
-      text: "Your emergency post received a response",
+      title: "Your emergency post received a response",
       time: "1 hour ago",
     },
     {
-      id: 3,
-      text: "New announcement from StackShare",
+      title: "New announcement from StackShare",
       time: "Yesterday",
     },
   ];
@@ -24,19 +21,19 @@ function NotificationsPage() {
       <div className="notifications-card">
         <h2>Notifications</h2>
 
-        {notifications.map((item) => (
-          <div className="notification-item" key={item.id}>
-            <div className="icon">🔔</div>
-            <div className="content">
-              <p className="text">{item.text}</p>
-              <span className="time">{item.time}</span>
+        <div className="notification-list">
+          {notifications.map((item, index) => (
+            <div key={index} className="notification-item">
+              <span className="bell">🔔</span>
+              <div>
+                <p className="title">{item.title}</p>
+                <p className="time">{item.time}</p>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );
 }
-
-export default NotificationsPage;
 
