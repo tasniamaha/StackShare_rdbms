@@ -1,56 +1,43 @@
-import { useState } from "react";
 import "./EmergencyPostPage.css";
 
-function EmergencyPostPage() {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [urgency, setUrgency] = useState("Normal");
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Emergency Post:");
-    console.log("Title:", title);
-    console.log("Description:", description);
-    console.log("Urgency:", urgency);
-    alert("Emergency post submitted (frontend only)");
-  };
-
+export default function EmergencyPostPage() {
   return (
-    <div className="emergency-page">
+    <div className="emergency-bg">
       <div className="emergency-card">
         <h2>Emergency Post</h2>
         <p className="subtitle">
           Post urgent requests to your university community
         </p>
 
-        <form onSubmit={handleSubmit}>
+        <form className="emergency-form">
           <input
             type="text"
             placeholder="Post Title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
             required
           />
 
           <textarea
-            placeholder="Describe the emergency..."
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
             rows="4"
+            placeholder="Describe the emergency..."
             required
-          ></textarea>
+          />
 
-          <select
-            value={urgency}
-            onChange={(e) => setUrgency(e.target.value)}
-          >
-            <option value="Low">Low</option>
-            <option value="Normal">Normal</option>
-            <option value="High">High</option>
-            <option value="Critical">Critical</option>
+          <select required>
+            <option value="low">
+              Low (needed in ~2 weeks)
+            </option>
+            <option value="normal">
+              Normal (needed in ~2 days)
+            </option>
+            <option value="high">
+              High (needed in ~1 hour)
+            </option>
+            <option value="critical">
+              Critical (needed NOW)
+            </option>
           </select>
 
-          <button type="submit" className="post-btn">
+          <button type="submit">
             Post Emergency
           </button>
         </form>
@@ -58,5 +45,3 @@ function EmergencyPostPage() {
     </div>
   );
 }
-
-export default EmergencyPostPage;
