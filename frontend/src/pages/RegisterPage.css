@@ -64,22 +64,6 @@
   box-shadow: 0 0 18px rgba(236, 72, 153, 0.9);
 }
 
-/* Forgot password */
-.forgot {
-  text-align: right;
-  font-size: 13px;
-  margin-bottom: 12px;
-}
-
-.forgot span {
-  cursor: pointer;
-  color: #c7d2fe;
-}
-
-.forgot span:hover {
-  text-decoration: underline;
-}
-
 /* Button */
 .auth-btn {
   width: 100%;
@@ -91,7 +75,7 @@
   color: #fff;
   font-size: 15px;
   font-weight: bold;
-  margin-top: 8px;
+  margin-top: 10px;
   transition: box-shadow 0.3s ease, transform 0.2s ease;
 }
 
@@ -116,3 +100,4 @@
 .auth-footer span:hover {
   text-decoration: underline;
 }
+
