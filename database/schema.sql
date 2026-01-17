@@ -16,6 +16,7 @@ CREATE TABLE students (
     student_email VARCHAR(50) NOT NULL UNIQUE,
     student_dept VARCHAR(30) NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
+    role VARCHAR(10) DEFAULT 'student',
     reputation_score INT DEFAULT 100 CHECK (reputation_score >= 0),
     borrow_status VARCHAR(20) DEFAULT 'Active',
     suspended_until DATE
@@ -214,4 +215,18 @@ CREATE TABLE audit_logs (
     performed_by VARCHAR(10),
     timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (performed_by) REFERENCES students(student_id)
+);
+
+-- ================================
+-- INSERT DEFAULT ADMIN
+-- Password: admin123 (hashed with bcrypt)
+-- ================================
+INSERT INTO students (student_id, student_name, student_email, student_dept, password_hash, role)
+VALUES (
+    'ADM001', 
+    'System Admin', 
+    'admin@stackshare.com', 
+    'Administration',
+    '$2a$10$vI8aWBnW3fID.ZQ4/zo1G.q1lRps.9cGLcZEiGDMVr5yUP1KUOYTa',
+    'admin'
 );
