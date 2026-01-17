@@ -5,9 +5,10 @@ USE StackShare;
 create table students(
 	student_id varchar(10) primary key,
     student_name varchar(30) not null,
-    student_email varchar(30) not null,
+    student_email varchar(50) not null unique,
     student_dept varchar(30) not null,
     password_hash varchar(255) not null,
+    role varchar(10) default 'student',
     reputation_score int default 100 check (reputation_score >= 0),
 	borrow_status varchar(20) default 'Active',
     suspended_until date
@@ -108,6 +109,7 @@ CREATE TABLE damage_reports (
     FOREIGN KEY (reported_by) REFERENCES students(student_id),
     FOREIGN KEY (accused_student) REFERENCES students(student_id)
 );
+
 CREATE TABLE broadcast_requests (
     broadcast_id INT AUTO_INCREMENT PRIMARY KEY,
     requester_id VARCHAR(10) NOT NULL,
@@ -119,6 +121,7 @@ CREATE TABLE broadcast_requests (
 
     FOREIGN KEY (requester_id) REFERENCES students(student_id) ON DELETE CASCADE
 );
+
 CREATE TABLE broadcast_responses (
     response_id INT AUTO_INCREMENT PRIMARY KEY,
     broadcast_id INT NOT NULL,
@@ -130,6 +133,7 @@ CREATE TABLE broadcast_responses (
     FOREIGN KEY (responder_id) REFERENCES students(student_id),
     FOREIGN KEY (device_id) REFERENCES devices(device_id)
 );
+
 CREATE TABLE fine_reports (
     fine_id INT AUTO_INCREMENT PRIMARY KEY,
     borrow_id INT NOT NULL,
@@ -140,27 +144,29 @@ CREATE TABLE fine_reports (
     imposed_date DATETIME DEFAULT CURRENT_TIMESTAMP,
     due_date DATE,
     paid_date DATE,
-    imposed_by VARCHAR(10),   -- admin or owner who imposed fine
+    imposed_by VARCHAR(10),
     remarks TEXT,
     FOREIGN KEY (borrow_id) REFERENCES borrow_requests(borrow_id) ON DELETE CASCADE,
     FOREIGN KEY (student_id) REFERENCES students(student_id) ON DELETE CASCADE,
-    FOREIGN KEY (imposed_by)REFERENCES students(student_id)
+    FOREIGN KEY (imposed_by) REFERENCES students(student_id)
 );
+
 CREATE TABLE notifications (
     notification_id INT AUTO_INCREMENT PRIMARY KEY,
 
-    user_id VARCHAR(10) NOT NULL,        -- receiver of the notification
-    related_entity VARCHAR(50),          -- e.g., 'borrow_request', 'damage_report', 'fine'
-    related_id INT,                      -- ID of the related record
+    user_id VARCHAR(10) NOT NULL,
+    related_entity VARCHAR(50),
+    related_id INT,
 
     message TEXT NOT NULL,
-    notification_type VARCHAR(30) CHECK (notification_type IN ('Info', 'Warning', 'Alert', 'Reminder')),
+    notification_type ENUM('Info', 'Warning', 'Alert', 'Reminder'),
 
     is_read BOOLEAN DEFAULT FALSE,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (user_id) REFERENCES students(student_id) ON DELETE CASCADE
 );
+
 CREATE TABLE usage_stats (
     usage_id INT AUTO_INCREMENT PRIMARY KEY,
     student_id VARCHAR(10) NOT NULL,
@@ -170,6 +176,7 @@ CREATE TABLE usage_stats (
     FOREIGN KEY (student_id) REFERENCES students(student_id),
     FOREIGN KEY (device_id) REFERENCES devices(device_id)
 );
+
 CREATE TABLE audit_logs (
     audit_id INT AUTO_INCREMENT PRIMARY KEY,
     table_name VARCHAR(50),
@@ -178,4 +185,18 @@ CREATE TABLE audit_logs (
     performed_by VARCHAR(10),
     timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (performed_by) REFERENCES students(student_id)
+);
+
+-- ================================
+-- INSERT DEFAULT ADMIN
+-- Password: admin123 (hashed with bcrypt)
+-- ================================
+INSERT INTO students (student_id, student_name, student_email, student_dept, password_hash, role)
+VALUES (
+    'ADM001', 
+    'System Admin', 
+    'admin@stackshare.com', 
+    'Administration',
+    '$2a$10$vI8aWBnW3fID.ZQ4/zo1G.q1lRps.9cGLcZEiGDMVr5yUP1KUOYTa',
+    'admin'
 );
