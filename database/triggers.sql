@@ -1,7 +1,30 @@
 USE StackShare;
+-- auto audit on user creation
+
+DELIMITER $$
+
+CREATE TRIGGER after_student_insert
+AFTER INSERT ON students
+FOR EACH ROW
+BEGIN
+    INSERT INTO audit_logs (
+        table_name,
+        record_id,
+        action,
+        performed_by
+    )
+    VALUES (
+        'students',
+        NEW.student_id,
+        'INSERT',
+        NEW.student_id
+    );
+END$$
+
+DELIMITER ;
 
 -- ================================
--- 1️⃣ Update device_status to 'Borrowed' when a borrow request starts
+-- Update device_status to 'Borrowed' when a borrow request starts
 -- ================================
 DELIMITER $$
 CREATE TRIGGER trg_device_borrowed
@@ -17,7 +40,7 @@ END$$
 DELIMITER ;
 
 -- ================================
--- 2️⃣ Update device_status to 'Available' and increment borrow_count when returned
+-- Update device_status to 'Available' and increment borrow_count when returned
 -- ================================
 DELIMITER $$
 CREATE TRIGGER trg_device_returned
@@ -34,7 +57,7 @@ END$$
 DELIMITER ;
 
 -- ================================
--- 3️⃣ Insert into audit_logs on UPDATE or DELETE of borrow_requests
+-- Insert into audit_logs on UPDATE or DELETE of borrow_requests
 -- ================================
 DELIMITER $$
 CREATE TRIGGER trg_audit_borrow_update
@@ -57,7 +80,7 @@ END$$
 DELIMITER ;
 
 -- ================================
--- 4️⃣ Auto-create notification when a borrow request is approved
+-- Auto-create notification when a borrow request is approved
 -- ================================
 DELIMITER $$
 CREATE TRIGGER trg_notify_borrow_approved
@@ -72,7 +95,7 @@ END$$
 DELIMITER ;
 
 -- ================================
--- 5️⃣ Penalize reputation score on confirmed damage
+-- Penalize reputation score on confirmed damage
 -- ================================
 DELIMITER $$
 CREATE TRIGGER trg_penalize_reputation
