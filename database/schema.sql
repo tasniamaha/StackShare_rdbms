@@ -217,16 +217,3 @@ CREATE TABLE audit_logs (
     FOREIGN KEY (performed_by) REFERENCES students(student_id)
 );
 
--- ================================
--- INSERT DEFAULT ADMIN
--- Password: admin123 (hashed with bcrypt)
--- ================================
-INSERT INTO students (student_id, student_name, student_email, student_dept, password_hash, role)
-VALUES (
-    'ADM001', 
-    'System Admin', 
-    'admin@stackshare.com', 
-    'Administration',
-    '$2a$10$vI8aWBnW3fID.ZQ4/zo1G.q1lRps.9cGLcZEiGDMVr5yUP1KUOYTa',
-    'admin'
-);

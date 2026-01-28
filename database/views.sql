@@ -1,7 +1,7 @@
 USE StackShare;
 
 -- ================================
--- 1️⃣ view_active_borrows
+-- view_active_borrows
 -- Shows all active borrows (Borrowed or Overdue) with student and device info
 -- ================================
 CREATE OR REPLACE VIEW view_active_borrows AS
@@ -19,7 +19,7 @@ JOIN devices d ON br.device_id = d.device_id
 WHERE br.borrow_status IN ('Borrowed','Overdue');
 
 -- ================================
--- 2️⃣ view_device_availability
+-- view_device_availability
 -- Shows all devices with current status and next waiting student if any
 -- ================================
 CREATE OR REPLACE VIEW view_device_availability AS
@@ -45,7 +45,7 @@ LEFT JOIN (
 LEFT JOIN students s ON w.student_id = s.student_id;
 
 -- ================================
--- 3️⃣ view_student_reputation
+-- view_student_reputation
 -- Shows students with current reputation, number of active borrows and overdue borrows
 -- ================================
 CREATE OR REPLACE VIEW view_student_reputation AS
@@ -60,7 +60,7 @@ GROUP BY s.student_id, s.student_name, s.reputation_score
 ORDER BY s.reputation_score DESC;
 
 -- ================================
--- 4️⃣ view_pending_damages
+--view_pending_damages
 -- Shows all damage reports currently under review
 -- ================================
 CREATE OR REPLACE VIEW view_pending_damages AS
@@ -83,7 +83,7 @@ WHERE dr.status = 'Under_Review'
 ORDER BY dr.report_date ASC;
 
 -- ================================
--- 5️⃣ view_top_borrowed_devices
+--view_top_borrowed_devices
 -- Shows top 5 most borrowed devices
 -- ================================
 CREATE OR REPLACE VIEW view_top_borrowed_devices AS
@@ -93,7 +93,7 @@ ORDER BY borrow_count DESC
 LIMIT 5;
 
 -- ================================
--- 6️⃣ view_overdue_fines
+--  view_overdue_fines
 -- Shows students with overdue fines and amounts
 -- ================================
 CREATE OR REPLACE VIEW view_overdue_fines AS
@@ -108,7 +108,7 @@ GROUP BY fr.student_id, s.student_name
 ORDER BY overdue_amount DESC;
 
 -- ================================
--- 7️⃣ view_pending_notifications
+--view_pending_notifications
 -- Shows all unread notifications
 -- ================================
 CREATE OR REPLACE VIEW view_pending_notifications AS

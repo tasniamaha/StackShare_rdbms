@@ -1,7 +1,7 @@
 USE StackShare;
 
 -- ================================
--- 1️⃣ Available Devices
+-- Available Devices
 -- List devices that are currently available
 -- ================================
 SELECT device_id, device_name, device_category, condition_status, borrow_count, device_status
@@ -9,8 +9,8 @@ FROM view_device_availability
 WHERE device_status = 'Available';
 
 -- ================================
--- 2️⃣ Borrow History of a Student
--- Replace 'STU001' with a real student_id
+-- Borrow History of a Student
+
 -- ================================
 SELECT *
 FROM view_active_borrows
@@ -18,7 +18,7 @@ WHERE student_id = 'STU001'
 ORDER BY borrow_start_date DESC;
 
 -- ================================
--- 3️⃣ Overdue Borrow Requests
+
 -- Show all borrow requests that are overdue
 -- ================================
 SELECT *
@@ -27,7 +27,7 @@ WHERE borrow_status = 'Overdue'
 ORDER BY borrow_end_date ASC;
 
 -- ================================
--- 4️⃣ Waitlist Priority
+--  Waitlist Priority
 -- Shows students in waitlist for a device, sorted by priority_level and request_time
 -- Replace 101 with actual device_id
 -- ================================
@@ -38,7 +38,7 @@ WHERE w.device_id = 101
 ORDER BY w.priority_level DESC, w.request_time ASC;
 
 -- ================================
--- 5️⃣ Fine Calculation
+-- Fine Calculation
 -- Total fines per student and outstanding fines
 -- ================================
 SELECT student_id, student_name, 
@@ -48,7 +48,7 @@ GROUP BY student_id, student_name
 ORDER BY total_overdue_fines DESC;
 
 -- ================================
--- 6️⃣ Damage Reports Pending Review
+-- Damage Reports Pending Review
 -- Shows damage reports that have not yet been reviewed by admin
 -- ================================
 SELECT *
@@ -56,21 +56,20 @@ FROM view_pending_damages
 ORDER BY report_date ASC;
 
 -- ================================
--- 7️⃣ Optional: Top 5 Most Borrowed Devices
+--  Optional: Top 5 Most Borrowed Devices
 -- ================================
 SELECT *
 FROM view_top_borrowed_devices;
 
--- ================================
--- 8️⃣ Optional: Students with Active Borrows
--- ================================
+-- Students with Active Borrows
+
 SELECT student_id, student_name, active_borrows
 FROM view_student_reputation
 WHERE active_borrows > 0
 ORDER BY active_borrows DESC;
 
 -- ================================
--- 9️⃣ Optional: Pending Notifications
+-- Optional: Pending Notifications
 -- Shows all unread notifications
 -- ================================
 SELECT *
