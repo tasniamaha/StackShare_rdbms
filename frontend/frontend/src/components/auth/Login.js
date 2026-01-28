@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import apiClient from '../api/apiClient';
 import { saveAuth } from '../utils/authStorage';
 
-import './Login.css'; // ← create this file next to Login.js
+import './Login.css';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -19,6 +19,7 @@ const Login = () => {
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+    setError(''); // Clear error when user starts typing
   };
 
   const handleLogin = async (e) => {
@@ -27,14 +28,14 @@ const Login = () => {
     setLoading(true);
 
     if (!form.student_email.trim() || !form.password.trim()) {
-      setError('Please enter email and password');
+      setError('Please enter both email and password');
       setLoading(false);
       return;
     }
 
     try {
       const response = await apiClient.post('/auth/login', {
-        student_email: form.student_email,
+        student_email: form.student_email.trim(),
         password: form.password,
       });
 
@@ -44,29 +45,35 @@ const Login = () => {
         throw new Error('Invalid response from server');
       }
 
+      // Save token + user data
       saveAuth(token, user);
 
-      // Adjust redirect according to your app structure
-      // Most likely all users go to the same dashboard in your current backend
+      console.log('Login successful:', user.student_name || user.student_email);
+
+      // Temporary: everyone goes to Borrower Dashboard
       navigate('/dashboard');
 
-      // If you later add role-based routing:
-      // if (user.role === 'admin' || user.role === 'owner') {
-      //   navigate('/admin/dashboard');
+      // When you add role to backend login response, replace with:
+      // const role = user.role;
+      // if (role === 'owner' || role === 'admin') {
+      //   navigate('/owner/dashboard');
       // } else {
       //   navigate('/dashboard');
       // }
+
     } catch (err) {
+      console.error('Login error:', err);
+
       const msg = err.response?.data?.message || '';
 
       if (msg.includes('suspended')) {
         setError('Your account is suspended. Please contact support.');
-      } else if (msg.includes('Invalid credentials')) {
+      } else if (msg.includes('Invalid credentials') || msg.includes('invalid')) {
         setError('Incorrect email or password');
       } else if (msg) {
         setError(msg);
       } else {
-        setError('Could not connect to the server. Please try again.');
+        setError('Could not connect to the server. Please try again later.');
       }
     } finally {
       setLoading(false);
@@ -78,7 +85,7 @@ const Login = () => {
       <div className="login-card">
         <div className="login-header">
           <h1>Sign In</h1>
-          <p>Welcome back to the device borrowing system</p>
+          <p>Welcome back to StackShare</p>
         </div>
 
         {error && <div className="error-alert">{error}</div>}
@@ -132,8 +139,6 @@ const Login = () => {
                 Create account
               </a>
             </p>
-            {/* Uncomment when you implement forgot password */}
-            {/* <a href="/forgot-password" className="link-forgot">Forgot password?</a> */}
           </div>
         </form>
       </div>
