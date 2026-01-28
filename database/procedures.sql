@@ -1,85 +1,112 @@
 USE StackShare;
+DELIMITER $$
+
+CREATE PROCEDURE assign_device_owner(
+    IN p_student_id VARCHAR(10),
+    IN p_device_id INT
+)
+BEGIN
+    DECLARE v_student_exists INT;
+    DECLARE v_device_exists INT;
+    DECLARE v_already_owner INT;
+
+    -- 1. Check if student exists
+    SELECT COUNT(*) INTO v_student_exists
+    FROM students
+    WHERE student_id = p_student_id;
+
+    IF v_student_exists = 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Student does not exist';
+    END IF;
+
+    -- 2. Check if device exists
+    SELECT COUNT(*) INTO v_device_exists
+    FROM devices
+    WHERE device_id = p_device_id;
+
+    IF v_device_exists = 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Device does not exist';
+    END IF;
+
+    -- 3. Check if student is already an owner
+    SELECT COUNT(*) INTO v_already_owner
+    FROM device_owners
+    WHERE owner_id = p_student_id
+      AND device_id = p_device_id;
+
+    IF v_already_owner > 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Student is already an owner of this device';
+    END IF;
+
+    -- 4. Insert ownership record
+    INSERT INTO device_owners (owner_id, device_id)
+    VALUES (p_student_id, p_device_id);
+END$$
+
+DELIMITER ;
 
 -- ================================
--- 1️⃣ approve_borrow_request
+--  approve_borrow_request
 -- Approves a borrow request, sets borrow status, dates, and notifies student
 -- ================================
 DELIMITER $$
+
 CREATE PROCEDURE approve_borrow_request(
-    IN p_borrow_id INT, 
+    IN p_borrow_id INT,
     IN p_approver_id VARCHAR(10)
 )
 BEGIN
-    DECLARE v_start_date DATE;
-    DECLARE v_end_date DATE;
+    DECLARE v_device_id INT;
+    DECLARE v_status VARCHAR(20);
+    DECLARE v_student_id VARCHAR(10);
 
-    -- Set start date as today, end date 7 days later (example)
-    SET v_start_date = CURDATE();
-    SET v_end_date = DATE_ADD(v_start_date, INTERVAL 7 DAY);
+    START TRANSACTION;
 
-    -- Update borrow request
+    SELECT device_id, approval_status, student_id
+    INTO v_device_id, v_status, v_student_id
+    FROM borrow_requests
+    WHERE borrow_id = p_borrow_id
+    FOR UPDATE;
+
+    IF v_status <> 'Pending' THEN
+        ROLLBACK;
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Borrow request is not pending';
+    END IF;
+
     UPDATE borrow_requests
     SET approval_status = 'Approved',
         borrow_status = 'Borrowed',
         approved_by = p_approver_id,
         approved_at = NOW(),
-        borrow_start_date = v_start_date,
-        borrow_end_date = v_end_date
+        borrow_start_date = CURDATE(),
+        borrow_end_date = DATE_ADD(CURDATE(), INTERVAL 7 DAY)
     WHERE borrow_id = p_borrow_id;
 
-    -- Update device status
-    UPDATE devices d
-    JOIN borrow_requests br ON d.device_id = br.device_id
-    SET d.device_status = 'Borrowed'
-    WHERE br.borrow_id = p_borrow_id;
-
-    -- Create notification
-    INSERT INTO notifications(user_id, related_entity, related_id, message, notification_type)
-    SELECT student_id, 'borrow_request', borrow_id, 'Your borrow request has been approved!', 'Info'
-    FROM borrow_requests
-    WHERE borrow_id = p_borrow_id;
-END$$
-DELIMITER ;
-
--- ================================
--- 2️⃣ return_device
--- Marks a device as returned, updates borrow count, logs return
--- ================================
-DELIMITER $$
-CREATE PROCEDURE return_device(
-    IN p_borrow_id INT, 
-    IN p_condition VARCHAR(20), 
-    IN p_remarks TEXT
-)
-BEGIN
-    DECLARE v_device_id INT;
-
-    -- Get device id
-    SELECT device_id INTO v_device_id 
-    FROM borrow_requests 
-    WHERE borrow_id = p_borrow_id;
-
-    -- Update borrow request
-    UPDATE borrow_requests
-    SET borrow_status = 'Returned',
-        return_date = CURDATE(),
-        borrow_condition_snapshot = p_condition
-    WHERE borrow_id = p_borrow_id;
-
-    -- Update device status and increment borrow_count
     UPDATE devices
-    SET device_status = 'Available',
-        borrow_count = borrow_count + 1
-    WHERE device_id = v_device_id;
+    SET device_status = 'Borrowed'
+    WHERE device_id = v_device_id
+      AND device_status = 'Available';
 
-    -- Insert into return logs
-    INSERT INTO return_logs(borrow_id, device_id, returned_at, condition_status, remarks)
-    VALUES (p_borrow_id, v_device_id, CURDATE(), p_condition, p_remarks);
+    INSERT INTO notifications (
+        user_id, related_entity, related_id, message, notification_type
+    )
+    SELECT
+        v_student_id,
+        'borrow_request',
+        p_borrow_id,
+        'Your borrow request has been approved',
+        'Info';
+
+    COMMIT;
 END$$
-DELIMITER ;
 
+DELIMITER ;
 -- ================================
--- 3️⃣ apply_fine
+--  apply_fine
 -- Applies a fine to a student for a borrow or damage
 -- ================================
 DELIMITER $$
@@ -97,7 +124,15 @@ BEGIN
     ) VALUES (
         p_borrow_id, p_student_id, p_reason, p_amount, 'Pending', NOW(), p_due_date, p_imposed_by
     );
+    SELECT COUNT(*) INTO v_exists
+    FROM borrow_requests
+    WHERE borrow_id = p_borrow_id;
 
+    IF v_exists = 0 THEN
+        ROLLBACK;
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Invalid borrow_id for fine';
+    END IF;
     -- Notify student
     INSERT INTO notifications(user_id, related_entity, related_id, message, notification_type)
     VALUES (
@@ -111,42 +146,58 @@ END$$
 DELIMITER ;
 
 -- ================================
--- 4️⃣ notify_waitlist
+-- notify_waitlist
 -- Notify the next student in waitlist for a device
 -- ================================
 DELIMITER $$
+
 CREATE PROCEDURE notify_waitlist(IN p_device_id INT)
 BEGIN
     DECLARE v_student_id VARCHAR(10);
 
-    -- Find the next waiting student
-    SELECT student_id INTO v_student_id
+    -- Pick first waiting student
+    SELECT student_id
+    INTO v_student_id
     FROM waitlist
-    WHERE device_id = p_device_id AND status = 'waiting'
+    WHERE device_id = p_device_id
+      AND status = 'waiting'
     ORDER BY priority_level DESC, request_time ASC
     LIMIT 1;
 
     IF v_student_id IS NOT NULL THEN
-        -- Update waitlist status to notified
-        UPDATE waitlist
-        SET status = 'notified'
-        WHERE device_id = p_device_id AND student_id = v_student_id;
 
-        -- Insert notification
-        INSERT INTO notifications(user_id, related_entity, related_id, message, notification_type)
+        -- Reserve the device
+        UPDATE devices
+        SET device_status = 'Reserved'
+        WHERE device_id = p_device_id
+          AND device_status = 'Available';
+
+        -- Offer device to student
+        UPDATE waitlist
+        SET status = 'offered'
+        WHERE device_id = p_device_id
+          AND student_id = v_student_id;
+
+        -- Notify student
+        INSERT INTO notifications(
+            user_id, related_entity, related_id, message, notification_type
+        )
         VALUES (
-            v_student_id, 
-            'waitlist', 
-            p_device_id, 
-            'The device you requested is now available.', 
+            v_student_id,
+            'waitlist',
+            p_device_id,
+            'You have priority to borrow this device. Please respond within the allowed time.',
             'Info'
         );
+
     END IF;
 END$$
+
 DELIMITER ;
 
+
 -- ================================
--- 5️⃣ process_damage_report
+-- process_damage_report
 -- Confirms damage, applies fine, penalizes reputation
 -- ================================
 DELIMITER $$
