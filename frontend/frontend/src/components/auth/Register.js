@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import apiClient from '../api/apiClient';
 import { saveAuth } from '../utils/authStorage';
 
-import './Register.css';   // ← create this file next to Register.js
+import './Register.css';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -48,10 +48,10 @@ const Register = () => {
     setLoading(true);
 
     try {
-      // 1. Register
+      // 1. Register new user
       await apiClient.post('/auth/register', form);
 
-      // 2. Auto-login right after
+      // 2. Automatically log in right after registration
       const loginRes = await apiClient.post('/auth/login', {
         student_email: form.student_email,
         password: form.password,
@@ -60,27 +60,31 @@ const Register = () => {
       const { token, user } = loginRes.data;
 
       if (!token || !user) {
-        throw new Error('Login failed after registration');
+        throw new Error('Auto-login failed after registration');
       }
 
-      // 3. Save auth data
+      // 3. Save token + user data
       saveAuth(token, user);
 
-      // 4. Redirect (you can adjust paths later)
-      // Currently your backend does not send role → using fallback
+      // ───────────────────────────────────────────────────────────────
+      // Temporary solution: everyone goes to Borrower Dashboard after registration
       navigate('/dashboard');
 
-      // If you add role later in the login response:
-      // if (user.role === 'owner' || user.role === 'admin') {
+      // When you add role support in the backend login response, replace the line above with:
+      //
+      // const role = user.role;
+      // if (role === 'owner' || role === 'admin') {
       //   navigate('/owner/dashboard');
       // } else {
-      //   navigate('/borrower/dashboard');
+      //   navigate('/dashboard');
       // }
+      // ───────────────────────────────────────────────────────────────
+
     } catch (err) {
       const msg = err.response?.data?.message || '';
 
-      if (msg.includes('already registered')) {
-        setError('This email or student ID is already in use.');
+      if (msg.includes('already registered') || msg.includes('already in use')) {
+        setError('This email or student ID is already registered.');
       } else if (msg) {
         setError(msg);
       } else {
@@ -96,7 +100,7 @@ const Register = () => {
       <div className="register-card">
         <div className="register-header">
           <h1>Create Account</h1>
-          <p>Join our device borrowing system</p>
+          <p>Join StackShare – borrow or lend devices easily</p>
         </div>
 
         {error && <div className="error-alert">{error}</div>}
