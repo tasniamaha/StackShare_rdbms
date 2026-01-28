@@ -45,14 +45,14 @@ DETERMINISTIC
 BEGIN
     declare cnt int;
 
-    select count(*) in into cnt from borrow_requests where student_id = p_student_id and borrow_status in ('Borrowed', 'Overdue');
+    select count(*) into cnt from borrow_requests where student_id = p_student_id and borrow_status in ('Borrowed', 'Overdue');
 
     return cnt;
 END$$
 
 -- 5. Get Total Fines of a Student
 
-create total_fine_amount(p_student_id varchar(10))
+create function total_fine_amount(p_student_id varchar(10))
 returns decimal(10,2)
 DETERMINISTIC
 BEGIN
