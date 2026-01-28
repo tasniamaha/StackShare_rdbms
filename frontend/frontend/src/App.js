@@ -1,64 +1,67 @@
 // src/App.js
-import React from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate } from 'react-router-dom';
 
-import Login from "./components/auth/Login";
-import Register from "./components/auth/Register";
-import BorrowerDashboard from "./components/dashboards/BorrowerDashboard";
-import OwnerDashboard from "./components/dashboards/OwnerDashboard";
+// Pages & Components
+import LandingPage from './components/pages/LandingPage';
+import Login from './components/auth/Login';
+import Register from './components/auth/Register';
+import BorrowerDashboard from './components/dashboards/BorrowerDashboard';
+import OwnerDashboard from './components/dashboards/OwnerDashboard';
 
-import "./components/styles/main.css"; // global styles
+// Utils
+import { getAuthUser } from './components/utils/authStorage';
 
-// Utility to get logged-in user
-import { getAuthUser } from "./components/utils/authStorage";
+// Global styles
+import './components/styles/main.css';
+
+// Protected Route wrapper
+const ProtectedRoute = ({ children, allowedRoles = [] }) => {
+  const user = getAuthUser();
+
+  // Not logged in → redirect to login
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // If specific roles are required and user doesn't have them → redirect to correct dashboard
+  if (allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
+    const redirectPath = user.role === 'owner' ? '/owner/dashboard' : '/dashboard';
+    return <Navigate to={redirectPath} replace />;
+  }
+
+  return children;
+};
 
 function App() {
-  const user = getAuthUser(); // returns stored user object or null
-
   return (
     <Routes>
-      {/* Public routes */}
+      {/* Public routes – no authentication needed */}
+      <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
 
-      {/* Protected routes */}
+      {/* Borrower Dashboard – accessible to all logged-in users */}
       <Route
-        path="/borrower/dashboard"
+        path="/dashboard"
         element={
-          user && user.role !== "owner" ? (
+          <ProtectedRoute>
             <BorrowerDashboard />
-          ) : (
-            <Navigate to="/login" />
-          )
+          </ProtectedRoute>
         }
       />
 
+      {/* Owner Dashboard – only for users with role 'owner' */}
       <Route
         path="/owner/dashboard"
         element={
-          user && user.role === "owner" ? (
+          <ProtectedRoute allowedRoles={['owner']}>
             <OwnerDashboard />
-          ) : (
-            <Navigate to="/login" />
-          )
+          </ProtectedRoute>
         }
       />
 
-      {/* Redirect root to dashboard if logged in */}
-      <Route
-        path="/"
-        element={
-          user ? (
-            user.role === "owner" ? (
-              <Navigate to="/owner/dashboard" />
-            ) : (
-              <Navigate to="/borrower/dashboard" />
-            )
-          ) : (
-            <Navigate to="/login" />
-          )
-        }
-      />
+      {/* Catch-all route – redirect unknown paths to home */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
