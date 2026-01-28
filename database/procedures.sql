@@ -119,6 +119,8 @@ CREATE PROCEDURE apply_fine(
     IN p_due_date DATE
 )
 BEGIN
+    DECLARE v_exists INT DEFAULT 0;
+    DECLARE v_fine_id INT;
     INSERT INTO fine_reports(
         borrow_id, student_id, reason, fine_amount, fine_status, imposed_date, due_date, imposed_by
     ) VALUES (
