@@ -1,0 +1,118 @@
+/* Full page background */
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at left, #7c5cff, transparent 40%),
+              radial-gradient(circle at right, #3aa9ff, transparent 40%),
+              linear-gradient(135deg, #0f172a, #020617);
+  font-family: "Segoe UI", sans-serif;
+}
+
+/* Glass card */
+.auth-card {
+  width: 360px;
+  padding: 28px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+  text-align: center;
+  color: #fff;
+}
+
+/* Titles */
+.auth-title {
+  margin-bottom: 6px;
+  font-size: 26px;
+}
+
+.auth-subtitle {
+  font-size: 14px;
+  opacity: 0.85;
+  margin-bottom: 18px;
+}
+
+/* Inputs */
+.auth-input {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 14px;
+  border-radius: 10px;
+  border: none;
+  outline: none;
+  background: rgba(255, 255, 255, 0.25);
+  color: #fff;
+  font-size: 14px;
+  transition: box-shadow 0.3s ease, background 0.3s ease;
+}
+
+.auth-input::placeholder {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Hover glow */
+.auth-input:hover {
+  box-shadow: 0 0 12px rgba(168, 85, 247, 0.6);
+}
+
+/* Focus glow */
+.auth-input:focus {
+  background: rgba(255, 255, 255, 0.35);
+  box-shadow: 0 0 18px rgba(236, 72, 153, 0.9);
+}
+
+/* Forgot password */
+.forgot {
+  text-align: right;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+.forgot span {
+  cursor: pointer;
+  color: #c7d2fe;
+}
+
+.forgot span:hover {
+  text-decoration: underline;
+}
+
+/* Button */
+.auth-btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  background: linear-gradient(90deg, #a855f7, #ec4899);
+  color: #fff;
+  font-size: 15px;
+  font-weight: bold;
+  margin-top: 8px;
+  transition: box-shadow 0.3s ease, transform 0.2s ease;
+}
+
+.auth-btn:hover {
+  box-shadow: 0 0 22px rgba(236, 72, 153, 0.9);
+  transform: scale(1.03);
+}
+
+/* Footer */
+.auth-footer {
+  margin-top: 16px;
+  font-size: 13px;
+  opacity: 0.9;
+}
+
+.auth-footer span {
+  color: #38bdf8;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.auth-footer span:hover {
+  text-decoration: underline;
+}
