@@ -1,0 +1,346 @@
+/* src/components/devices/DeviceList.css */
+
+.device-list-page {
+  min-height: 100vh;
+  position: relative;
+  color: #f0f4ff;
+  background: #0a0014;
+  overflow-x: hidden;
+}
+
+/* Background layers */
+.bg-layer {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, #0a0014, #140028);
+  z-index: 0;
+}
+
+.overlay-gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(10,0,20,0.7), rgba(10,0,20,0.95));
+  z-index: 1;
+}
+
+.list-content {
+  position: relative;
+  z-index: 10;
+  padding: 2rem 1.5rem 4rem;
+}
+
+/* Header + Controls */
+.list-header {
+  margin-bottom: 2.5rem;
+  text-align: center;
+}
+
+.header-title h1 {
+  font-size: 3.2rem;
+  font-weight: 800;
+  background: linear-gradient(90deg, #00f0ff, #ff00d4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 0.5rem;
+}
+
+.header-subtitle {
+  color: #b0e0ff;
+  font-size: 1.2rem;
+}
+
+.header-controls {
+  margin-top: 1.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+  align-items: center;
+}
+
+.search-form {
+  display: flex;
+  gap: 1rem;
+  max-width: 700px;
+  width: 100%;
+}
+
+.search-input-wrapper {
+  position: relative;
+  flex: 1;
+}
+
+.search-icon {
+  position: absolute;
+  left: 1.2rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #00f0ff;
+  pointer-events: none;
+}
+
+.search-form input {
+  width: 100%;
+  padding: 1rem 1rem 1rem 3.5rem;
+  background: rgba(0,0,0,0.45);
+  border: 1px solid rgba(0,240,255,0.35);
+  border-radius: 12px;
+  color: white;
+  font-size: 1.05rem;
+}
+
+.search-btn {
+  padding: 1rem 2rem;
+  background: linear-gradient(90deg, #ff00d4, #c300ff);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.search-btn:hover {
+  transform: scale(1.03);
+  box-shadow: 0 0 20px rgba(195,0,255,0.5);
+}
+
+.filter-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 160px;
+}
+
+.filter-group label {
+  font-size: 0.95rem;
+  color: #b0e0ff;
+}
+
+.filter-group select,
+.filter-group input {
+  padding: 0.9rem;
+  background: rgba(0,0,0,0.45);
+  border: 1px solid rgba(0,240,255,0.35);
+  border-radius: 10px;
+  color: white;
+  font-size: 1rem;
+}
+
+.clear-filters-btn {
+  padding: 0.9rem 1.6rem;
+  background: rgba(255,51,102,0.18);
+  border: 1px solid #ff3366;
+  color: #ff3366;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.clear-filters-btn:hover {
+  background: rgba(255,51,102,0.28);
+}
+
+.view-toggle {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.view-btn {
+  padding: 0.9rem;
+  background: rgba(0,240,255,0.12);
+  border: 1px solid rgba(0,240,255,0.4);
+  color: #00f0ff;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.view-btn.active {
+  background: rgba(0,240,255,0.28);
+  box-shadow: 0 0 15px rgba(0,240,255,0.4);
+}
+
+/* Device display (grid/list) */
+.devices-display.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.8rem;
+}
+
+.devices-display.list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.device-item {
+  background: rgba(18, 12, 38, 0.72);
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(0,240,255,0.22);
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.device-item:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0,240,255,0.18);
+}
+
+.device-image-container {
+  position: relative;
+  height: 220px;
+}
+
+.device-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.status-overlay {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.status-overlay.available {
+  background: rgba(0,255,157,0.25);
+  color: #00ff9d;
+}
+
+.status-overlay.borrowed {
+  background: rgba(255,170,0,0.25);
+  color: #ffaa00;
+}
+
+.device-info {
+  padding: 1.4rem;
+}
+
+.device-name {
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: #00f0ff;
+}
+
+.device-category {
+  color: #b0e0ff;
+  font-size: 0.95rem;
+  margin-bottom: 0.6rem;
+}
+
+.device-price {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #ff00d4;
+  margin-bottom: 0.6rem;
+}
+
+.device-owner {
+  color: #b0e0ff;
+  font-size: 0.95rem;
+}
+
+/* Loading & Error states */
+.loading-state, .error-state, .empty-state {
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #b0e0ff;
+  text-align: center;
+}
+
+.spin {
+  animation: spin 1.5s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 3rem;
+}
+
+.pagination button {
+  padding: 0.8rem 1.6rem;
+  background: rgba(0,240,255,0.14);
+  border: 1px solid rgba(0,240,255,0.4);
+  color: #00f0ff;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.pagination button:hover:not(:disabled) {
+  background: rgba(0,240,255,0.28);
+}
+
+.pagination button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .header-controls {
+    flex-direction: column;
+  }
+
+  .search-form {
+    flex-direction: column;
+  }
+
+  .filter-controls {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .devices-display.grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Free device indicators */
+.free-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: linear-gradient(135deg, #00ff9d, #00c8ff);
+  color: #000;
+  font-weight: 800;
+  padding: 0.4rem 1rem;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  box-shadow: 0 0 15px rgba(0,255,157,0.6);
+  z-index: 2;
+}
+
+.free-price {
+  color: #00ff9d !important;
+  font-weight: 800;
+  font-size: 1.5rem;
+  background: linear-gradient(90deg, #00ff9d, #00c8ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
