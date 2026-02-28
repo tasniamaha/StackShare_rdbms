@@ -1,0 +1,104 @@
+/* ===== Background (same theme as login/register) ===== */
+.emergency-bg {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background:
+    radial-gradient(circle at 20% 30%, rgba(138, 93, 255, 0.35), transparent 45%),
+    radial-gradient(circle at 80% 40%, rgba(0, 180, 255, 0.35), transparent 45%),
+    radial-gradient(circle at 50% 80%, rgba(255, 80, 160, 0.35), transparent 45%),
+    linear-gradient(135deg, #0b132b, #1c2541);
+}
+
+/* ===== Glass Card ===== */
+.emergency-card {
+  width: 420px;
+  padding: 32px;
+  border-radius: 18px;
+  text-align: center;
+
+  background: rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.35);
+  color: #fff;
+}
+
+/* ===== Text ===== */
+.emergency-card h2 {
+  margin-bottom: 6px;
+}
+
+.subtitle {
+  font-size: 14px;
+  opacity: 0.85;
+  margin-bottom: 22px;
+}
+
+/* ===== Form ===== */
+.emergency-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Inputs / Textarea / Select */
+.emergency-form input,
+.emergency-form textarea,
+.emergency-form select {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: none;
+
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  font-size: 14px;
+
+  transition: box-shadow 0.25s ease, background 0.25s ease;
+}
+
+/* Placeholder */
+.emergency-form input::placeholder,
+.emergency-form textarea::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Focus / Hover Glow */
+.emergency-form input:focus,
+.emergency-form textarea:focus,
+.emergency-form select:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.7);
+}
+
+/* ===== Dropdown options (fix visibility) ===== */
+.emergency-form select option {
+  background: #ffffff;
+  color: #111;
+}
+
+/* ===== Button ===== */
+.emergency-form button {
+  margin-top: 10px;
+  padding: 14px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+
+  background: linear-gradient(90deg, #a855f7, #ec4899);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.emergency-form button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(168, 85, 247, 0.5);
+}

@@ -1,0 +1,72 @@
+/* FULL PAGE BACKGROUND – SAME AS LOGIN / REGISTER */
+.notifications-page {
+  min-height: 100vh;
+  background: radial-gradient(circle at left, #7b5cff, transparent 45%),
+              radial-gradient(circle at right, #38bdf8, transparent 45%),
+              linear-gradient(135deg, #0f172a, #020617);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* BIG CARD (LIKE SECOND IMAGE SIZE) */
+.notifications-card {
+  width: 800px;
+  max-width: 90%;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(18px);
+  border-radius: 20px;
+  padding: 30px 35px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  color: white;
+}
+
+.notifications-card h2 {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+/* LIST */
+.notification-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* SINGLE ITEM */
+.notification-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 14px 18px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.08);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  cursor: pointer;
+}
+
+/* HOVER EFFECT */
+.notification-item:hover {
+  transform: translateX(6px);
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.6);
+}
+
+/* BELL ICON */
+.bell {
+  font-size: 22px;
+  transition: transform 0.3s ease;
+}
+
+.notification-item:hover .bell {
+  transform: rotate(-15deg) scale(1.1);
+}
+
+/* TEXT */
+.title {
+  font-weight: 500;
+}
+
+.time {
+  font-size: 13px;
+  opacity: 0.7;
+}
