@@ -1,0 +1,146 @@
+/* BorrowRequest Component Styles */
+
+.borrow-request-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 70px);
+  padding: 40px 20px;
+  background: linear-gradient(135deg, #f0f4f8 0%, #e1e8f0 100%);
+  font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+}
+
+.borrow-request-card {
+  width: 100%;
+  max-width: 600px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  padding: 40px;
+  border: 1px solid #d0dae5;
+}
+
+.borrow-request-title {
+  margin: 0 0 8px 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #333333;
+}
+
+.borrow-request-subtitle {
+  margin: 0 0 32px 0;
+  font-size: 1rem;
+  color: #666666;
+}
+
+.borrow-request-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.borrow-request-textarea-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.borrow-request-label {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #333333;
+}
+
+.borrow-request-textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d0dae5;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+  color: #333333;
+  background-color: #ffffff;
+  transition: all 0.2s ease;
+  outline: none;
+  box-sizing: border-box;
+  resize: vertical;
+}
+
+.borrow-request-textarea::placeholder {
+  color: #8b97a6;
+}
+
+.borrow-request-textarea:hover:not(:disabled) {
+  border-color: #b8c5d6;
+}
+
+.borrow-request-textarea:focus:not(:disabled) {
+  border-color: #4a90e2;
+  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+}
+
+.borrow-request-textarea:disabled {
+  opacity: 0.5;
+  pointer-events: none;
+  cursor: not-allowed;
+  background-color: #f0f4f8;
+}
+
+.borrow-request-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.borrow-request-loader-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.borrow-request-loading-text {
+  font-size: 1rem;
+  color: #4a90e2;
+  font-weight: 500;
+}
+
+.borrow-request-success-message {
+  margin: 0;
+  font-size: 1rem;
+  color: #333333;
+  line-height: 1.6;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .borrow-request-container {
+    padding: 20px 16px;
+  }
+
+  .borrow-request-card {
+    padding: 28px 20px;
+  }
+
+  .borrow-request-title {
+    font-size: 1.5rem;
+  }
+
+  .borrow-request-subtitle {
+    font-size: 0.9rem;
+    margin-bottom: 24px;
+  }
+
+  .borrow-request-form {
+    gap: 20px;
+  }
+
+  .borrow-request-loader-wrapper {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .borrow-request-loading-text {
+    font-size: 0.9rem;
+  }
+}
