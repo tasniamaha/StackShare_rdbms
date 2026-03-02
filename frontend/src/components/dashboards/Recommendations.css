@@ -1,0 +1,161 @@
+/* src/components/dashboards/Recommendations.css */
+
+.recommendations-page {
+  min-height: 100vh;
+  position: relative;
+  color: #f0f4ff;
+  background: #0a0014;
+  overflow-x: hidden;
+}
+
+/* Background layers (consistent with dashboards) */
+.bg-layer {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, #0a0014, #140028);
+  z-index: 0;
+}
+
+.overlay-gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(10,0,20,0.7), rgba(10,0,20,0.95));
+  z-index: 1;
+}
+
+/* Main content wrapper */
+.rec-content {
+  position: relative;
+  z-index: 10;
+  padding: 2rem 1.5rem 4rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Header */
+.recommendations-page h1 {
+  font-size: 3rem;
+  font-weight: 800;
+  text-align: center;
+  margin-bottom: 2.5rem;
+  background: linear-gradient(90deg, #00f0ff, #ff00d4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 20px rgba(0,240,255,0.3);
+}
+
+/* Grid of recommendation cards */
+.rec-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+/* Each recommendation card */
+.rec-card {
+  background: rgba(18, 12, 38, 0.72);
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(0,240,255,0.22);
+  backdrop-filter: blur(12px);
+  cursor: pointer;
+  transition: all 0.35s ease;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+}
+
+.rec-card:hover {
+  transform: translateY(-12px) scale(1.02);
+  box-shadow: 0 25px 50px rgba(0,240,255,0.25);
+}
+
+.rec-card img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.rec-card:hover img {
+  transform: scale(1.08);
+}
+
+.rec-card h3 {
+  font-size: 1.35rem;
+  margin: 1rem 1.2rem 0.5rem;
+  color: #00f0ff;
+  font-weight: 700;
+}
+
+.rec-card p {
+  margin: 0 1.2rem 1rem;
+  color: #b0e0ff;
+  font-size: 1rem;
+}
+
+.rec-card button {
+  width: 100%;
+  padding: 1rem;
+  background: rgba(0,240,255,0.18);
+  border: 1px solid rgba(0,240,255,0.4);
+  color: #00f0ff;
+  font-weight: 600;
+  border-radius: 0 0 16px 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  transition: all 0.3s;
+}
+
+.rec-card button:hover {
+  background: rgba(0,240,255,0.28);
+  transform: translateY(-2px);
+}
+
+/* Loading & Empty states */
+.loading-state, .empty-state {
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #b0e0ff;
+  text-align: center;
+}
+
+.loading-state .spinner {
+  width: 60px;
+  height: 60px;
+  border: 5px solid rgba(0,240,255,0.2);
+  border-top: 5px solid #00f0ff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1.5rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.empty-state p {
+  font-size: 1.4rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .rec-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .recommendations-page h1 {
+    font-size: 2.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .rec-card img {
+    height: 180px;
+  }
+}

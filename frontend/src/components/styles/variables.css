@@ -1,0 +1,46 @@
+/* src/components/styles/variables.css */
+
+:root {
+  /* Colors – neon cyberpunk palette */
+  --neon-cyan: #00f8ff;
+  --neon-magenta: #ff00d9;
+  --neon-purple: #c300ff;
+  --neon-green: #00ff9d;
+  --warning: #ffaa00;
+  --danger: #ff3366;
+  --success: #00ff9d;
+
+  /* Backgrounds & glass */
+  --bg-base: #0a0014;
+  --bg-glass: rgba(18, 12, 38, 0.62);
+  --border-glow: rgba(0, 248, 255, 0.24);
+  --panel-glass: rgba(18, 12, 38, 0.72);
+
+  /* Text */
+  --text-primary: #f2fbff;
+  --text-secondary: #b0e0ff;
+  --text-dim: #90c0e0;
+
+  /* Spacing */
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 1rem;
+  --spacing-md: 1.5rem;
+  --spacing-lg: 2.5rem;
+  --spacing-xl: 4rem;
+
+  /* Shadows & glow */
+  --glow-cyan: 0 0 20px rgba(0, 248, 255, 0.5);
+  --glow-magenta: 0 0 20px rgba(255, 0, 217, 0.5);
+  --shadow-neon: 0 10px 30px rgba(0, 240, 255, 0.18);
+
+  /* Border radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-pill: 999px;
+
+  /* Transitions */
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s ease;
+  --transition-smooth: 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
