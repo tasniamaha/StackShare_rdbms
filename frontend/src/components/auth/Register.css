@@ -104,3 +104,25 @@
   color: #00f0ff;
   font-weight: 600;
 }
+/* Role selection styling */
+.role-hint {
+  font-size: 0.9rem;
+  color: #b0e0ff;
+  margin-top: 0.5rem;
+  line-height: 1.4;
+}
+
+.sub-role-group {
+  margin-top: 1rem;
+  padding-left: 1rem;
+  border-left: 3px solid #00f0ff;
+  background: rgba(0,240,255,0.05);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+/* Make admin option stand out */
+select option[value="admin"] {
+  background: #ff3366;
+  color: white;
+}
