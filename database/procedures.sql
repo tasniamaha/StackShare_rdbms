@@ -91,18 +91,12 @@ BEGIN
     WHERE device_id = v_device_id
       AND device_status = 'Available';
 
-    INSERT INTO notifications (
-        user_id, related_entity, related_id, message, notification_type
-    )
-    SELECT
-        v_student_id,
-        'borrow_request',
-        p_borrow_id,
-        'Your borrow request has been approved',
-        'Info';
+    -- notification removed: handled automatically by trg_notify_borrow_approved trigger
 
     COMMIT;
 END$$
+
+DELIMITER ;
 
 DELIMITER ;
 -- ================================
