@@ -22,7 +22,8 @@ async function initializeDatabase() {
       'triggers.sql',
       'views.sql',
       'procedures.sql',
-      'constraints.sql'
+      'constraints.sql',
+      'functions.sql',
     ];
 
     for (const file of sqlFiles) {
