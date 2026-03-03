@@ -464,3 +464,167 @@
 .view-details-btn:hover {
   background: rgba(0,240,255,0.28);
 }
+
+/* Reputation pill enhancements */
+.reputation-pill.low-rep {
+  border-color: #ffaa00;
+  background: rgba(255, 170, 0, 0.08);
+}
+
+.reputation-pill.restricted {
+  border-color: #ff3366;
+  background: rgba(255, 51, 102, 0.12);
+  animation: pulse 2s infinite;
+}
+
+.rep-warning {
+  font-size: 0.85rem;
+  color: #ffaa00;
+  margin-top: 0.5rem;
+  text-align: center;
+}
+
+.rep-restricted {
+  font-size: 0.9rem;
+  color: #ff3366;
+  font-weight: 600;
+  margin-top: 0.6rem;
+  text-align: center;
+}
+
+.restriction-warning, .violation-notice {
+  background: rgba(255, 51, 102, 0.15);
+  border: 1px solid #ff3366;
+  color: #ff99aa;
+  padding: 0.8rem;
+  border-radius: 8px;
+  margin: 1rem 0;
+  text-align: center;
+}
+
+/* Quick pill for fines */
+.pill-button.warning {
+  background: rgba(255, 51, 102, 0.18);
+  border: 1px solid #ff3366;
+  color: #ff3366;
+}
+
+.pill-button.warning:hover {
+  background: rgba(255, 51, 102, 0.28);
+  box-shadow: 0 0 20px rgba(255, 51, 102, 0.4);
+}
+
+/* Fines Modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.fines-modal {
+  background: rgba(18, 12, 38, 0.95);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 900px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 0 40px rgba(0, 240, 255, 0.3);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid rgba(0, 240, 255, 0.2);
+}
+
+.close-modal-btn {
+  background: none;
+  border: none;
+  color: #ff3366;
+  cursor: pointer;
+}
+
+.modal-body {
+  padding: 2rem;
+}
+
+.fines-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.fine-card {
+  background: rgba(0, 240, 255, 0.06);
+  border-radius: 12px;
+  padding: 1.2rem;
+  border: 1px solid rgba(0, 240, 255, 0.16);
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.fine-image-wrapper {
+  width: 120px;
+  height: 120px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.fine-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.fine-details h4 {
+  margin: 0 0 0.6rem;
+  color: #00f0ff;
+}
+
+.fine-amount {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #ffaa00;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.4rem;
+}
+
+.fine-reason {
+  color: #ff99aa;
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+}
+
+.fine-date, .fine-status {
+  color: #b0e0ff;
+  margin-bottom: 0.4rem;
+}
+
+.fine-status.pending { color: #ffaa00; }
+.fine-status.paid { color: #00ff9d; }
+.fine-status.disputed { color: #ff3366; }
+
+.fine-details-text {
+  color: #d0eaff;
+  margin-top: 0.6rem;
+  font-size: 0.95rem;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  color: #b0e0ff;
+}

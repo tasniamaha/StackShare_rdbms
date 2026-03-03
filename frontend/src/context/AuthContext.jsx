@@ -1,143 +1,167 @@
-// src/context/AuthContext.jsx
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-
-// Optional: import your API functions if you have real login/logout endpoints
-// import * as authApi from '../components/auth/auth.api';
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback
+} from "react";
+import { useNavigate } from "react-router-dom";
 
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const navigate = useNavigate();
 
-
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Load user from localStorage on mount
+  /* =====================================================
+     Helper: Redirect Based On Role
+  ====================================================== */
+
+  const redirectByRole = (userData) => {
+    if (!userData?.role) return;
+
+    switch (userData.role) {
+      case "admin":
+        navigate("/admin/dashboard", { replace: true });
+        break;
+      case "owner":
+        navigate("/owner/dashboard", { replace: true });
+        break;
+      case "borrower":
+      default:
+        navigate("/dashboard", { replace: true });
+        break;
+    }
+  };
+
+  /* =====================================================
+     Load Stored Authentication On App Start
+  ====================================================== */
+
   useEffect(() => {
-    const loadStoredAuth = () => {
-      try {
-        const storedToken = localStorage.getItem('stackshare_token');
-        const storedUserJson = localStorage.getItem('stackshare_user');
-
-        if (!storedToken || !storedUserJson) {
-          setLoading(false);
-          return;
-        }
-
-        const parsedUser = JSON.parse(storedUserJson);
-
-        // Basic validation
-        if (!parsedUser || typeof parsedUser !== 'object' || !parsedUser.student_email) {
-          console.warn('Invalid stored user data — clearing');
-          clearAuth();
-          setLoading(false);
-          return;
-        }
-
-        setUser(parsedUser);
-setLoading(false);
-
-      } catch (err) {
-        console.error('Failed to load auth from localStorage:', err);
-        clearAuth();
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadStoredAuth();
-  }, [navigate]);
-
-  // Redirect logic based on role + login intent (?intent=lender)
- const location = useLocation();
-
-const redirectBasedOnRole = useCallback(
-  (role) => {
-    const urlParams = new URLSearchParams(location.search);
-    const intent = urlParams.get('intent');
-
-    if (role === 'admin') {
-      navigate('/admin/dashboard', { replace: true });
-    } else if (role === 'owner' || intent === 'lender') {
-      navigate('/owner/dashboard', { replace: true });
-    } else {
-      navigate('/dashboard', { replace: true });
-    }
-  },
-  [navigate, location.search]
-);
-
-  // Login function (called from Login component)
-  const login = useCallback(
-    (userData, token) => {
-      try {
-        localStorage.setItem('stackshare_token', token);
-        localStorage.setItem('stackshare_user', JSON.stringify(userData));
-        setUser(userData);
-
-        // Optional: real API logout call if needed
-        // await authApi.login({ email, password }); // if you have backend auth
-
-       navigate('/dashboard', { replace: true });
-      } catch (err) {
-        console.error('Failed to save auth data:', err);
-      }
-    },
-    [redirectBasedOnRole]
-  );
-
-  // Logout function
-  const logout = useCallback(() => {
     try {
-      localStorage.removeItem('stackshare_token');
-      localStorage.removeItem('stackshare_user');
-      setUser(null);
+      const token = localStorage.getItem("stackshare_token");
+      const storedUser = localStorage.getItem("stackshare_user");
 
-      // Optional: call backend logout endpoint
-      // await authApi.logout();
+      if (!token || !storedUser) {
+        setLoading(false);
+        return;
+      }
 
-      navigate('/login', { replace: true });
+      const parsedUser = JSON.parse(storedUser);
+
+      if (!parsedUser?.role) {
+        clearAuth();
+        return;
+      }
+
+      setUser(parsedUser);
+      redirectByRole(parsedUser);
+
     } catch (err) {
-      console.error('Logout failed:', err);
+      console.error("Auth load error:", err);
+      clearAuth();
+    } finally {
+      setLoading(false);
     }
-  }, [navigate]);
-
-  // Clear auth (used on error or invalid data)
-  const clearAuth = useCallback(() => {
-    localStorage.removeItem('stackshare_token');
-    localStorage.removeItem('stackshare_user');
-    setUser(null);
   }, []);
 
-  // Value provided to all consumers
+  /* =====================================================
+     Login Function
+  ====================================================== */
+
+  const login = useCallback((userData, token) => {
+    try {
+      localStorage.setItem("stackshare_token", token);
+      localStorage.setItem("stackshare_user", JSON.stringify(userData));
+
+      setUser(userData);
+
+      redirectByRole(userData);
+
+    } catch (err) {
+      console.error("Login storage error:", err);
+    }
+  }, []);
+
+  /* =====================================================
+     Logout Function
+  ====================================================== */
+
+  const logout = useCallback(() => {
+    try {
+      localStorage.removeItem("stackshare_token");
+      localStorage.removeItem("stackshare_user");
+
+      setUser(null);
+
+      navigate("/", { replace: true });
+
+    } catch (err) {
+      console.error("Logout error:", err);
+    }
+  }, []);
+
+  /* =====================================================
+     Clear Auth Helper
+  ====================================================== */
+
+  const clearAuth = useCallback(() => {
+    localStorage.removeItem("stackshare_token");
+    localStorage.removeItem("stackshare_user");
+    setUser(null);
+    navigate("/", { replace: true });
+  }, []);
+
+  /* =====================================================
+     Role Helpers
+  ====================================================== */
+
+  const isAuthenticated = !!user;
+  const isAdmin = user?.role === "admin";
+  const isOwner = user?.role === "owner";
+  const isBorrower = user?.role === "borrower";
+
+  /* =====================================================
+     Context Value
+  ====================================================== */
+
   const value = {
     user,
     loading,
     login,
     logout,
     clearAuth,
-    isAuthenticated: !!user,
+
+    isAuthenticated,
+    isAdmin,
+    isOwner,
+    isBorrower
   };
 
-  // Show nothing or a loading screen while checking auth
   if (loading) {
     return (
       <div className="auth-loading">
-        <div className="spinner"></div>
         <p>Checking authentication...</p>
       </div>
     );
   }
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
+
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used inside AuthProvider");
   }
+
   return context;
 };
