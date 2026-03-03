@@ -223,4 +223,3 @@ CREATE TABLE audit_logs (
     timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (performed_by) REFERENCES students(student_id)
 );
-

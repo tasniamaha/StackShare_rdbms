@@ -1,16 +1,16 @@
 import React from "react";
-import BorrowerDashboard from "./BorrowerDashboard";
-import OwnerDashboard from "./OwnerDashboard";
-import "./App.css";
-import "./BorrowerDashboard.css";
+import { BrowserRouter } from "react-router-dom";
+
+import AppRoutes from "./AppRoutes";
+import { AuthProvider } from "./context/AuthContext"; // ✅ Add this
 
 function App() {
-  const role = "owner"; // change to "borrower"
-
   return (
-    <div className="App">
-      {role === "owner" ? <OwnerDashboard /> : <BorrowerDashboard />}
-    </div>
+    <BrowserRouter>
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
 
