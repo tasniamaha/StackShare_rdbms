@@ -10,6 +10,7 @@ import {
   PlusCircle,
   Users,
   History,
+  Upload,
 } from 'lucide-react';
 
 import './OwnerDashboard.css';
@@ -94,27 +95,23 @@ export default function OwnerDashboard() {
 
   // Logout → clears auth data → redirects to Landing Page (/)
   const handleLogout = () => {
-    // Clear all possible auth keys (expand if needed)
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     localStorage.removeItem('stackshare_token');
     localStorage.removeItem('stackshare_user');
 
-    // Redirect to root → Landing Page
     navigate('/', { replace: true });
   };
 
   // Demo handlers for approve/reject (replace with real API calls later)
   const handleApprove = (id) => {
     alert(`Approved request #${id} — device lent!`);
-    // Optimistic UI update
     setPendingApprovals((prev) => prev.filter((req) => req.id !== id));
     setStats((prev) => ({ ...prev, pendingRequests: prev.pendingRequests - 1 }));
   };
 
   const handleReject = (id) => {
     alert(`Rejected request #${id}`);
-    // Optimistic UI update
     setPendingApprovals((prev) => prev.filter((req) => req.id !== id));
     setStats((prev) => ({ ...prev, pendingRequests: prev.pendingRequests - 1 }));
   };
@@ -202,14 +199,15 @@ export default function OwnerDashboard() {
           </motion.div>
         </div>
 
-        {/* Quick actions */}
+        {/* Quick actions – now with prominent Add Device button */}
         <div className="quick-actions-bar">
           <motion.button
-            className="action-pill primary"
-            whileHover={{ scale: 1.04 }}
-            onClick={() => navigate('/devices/add')}
+            className="action-pill primary add-device-btn"
+            whileHover={{ scale: 1.06, boxShadow: '0 0 25px rgba(0,240,255,0.4)' }}
+            whileTap={{ scale: 0.96 }}
+            onClick={() => navigate('/owner/add-device')}
           >
-            <PlusCircle size={20} />
+            <Upload size={20} />
             Add New Device
           </motion.button>
 
@@ -218,6 +216,7 @@ export default function OwnerDashboard() {
             whileHover={{ scale: 1.04 }}
             onClick={() => navigate('/my-devices')}
           >
+            <Package size={20} />
             View My Devices
           </motion.button>
 
@@ -249,7 +248,7 @@ export default function OwnerDashboard() {
                 key={device.id}
                 className="device-card"
                 whileHover={{ scale: 1.03, boxShadow: '0 15px 30px rgba(0,240,255,0.2)' }}
-                onClick={() => navigate(`/devices/${device.id}`)} // Click → Device Details
+                onClick={() => navigate(`/devices/${device.id}`)}
               >
                 <div className="device-image-wrapper">
                   <img src={device.image} alt={device.name} className="device-image" />
@@ -334,15 +333,4 @@ export default function OwnerDashboard() {
       </div>
     </div>
   );
-}
-
-// Demo handlers (replace with real API calls later)
-function handleApprove(id) {
-  alert(`Approved request #${id} — device lent!`);
-  // In real app: call API + update state
-}
-
-function handleReject(id) {
-  alert(`Rejected request #${id}`);
-  // In real app: call API + update state
 }
