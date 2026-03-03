@@ -62,4 +62,21 @@ BEGIN
 
     return ifnull(total, 0);
 END$$
+
+-- 6. Days overdue for a borrow (returns 0 if not overdue)
+create function days_overdue(p_borrow_id INT)
+returns int
+DETERMINISTIC
+begin
+    declare due_date date;
+
+    select borrow_end_date into due_date from borrow_requests where borrow_id = p_borrow_id;
+
+    if due_date is null or  CURDATE() <= due_date then
+        return 0;
+    end if;
+
+    return datediff(CURDATE(), due_date);
+END$$
+
 DELIMITER ;
