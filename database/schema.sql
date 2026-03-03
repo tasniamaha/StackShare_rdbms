@@ -19,7 +19,8 @@ CREATE TABLE students (
     role VARCHAR(10) DEFAULT 'student',
     reputation_score INT DEFAULT 100 CHECK (reputation_score >= 0),
     borrow_status VARCHAR(20) DEFAULT 'Active',
-    suspended_until DATE
+    suspended_until DATE,
+    whatsapp_number VARCHAR(20)
 );
 
 -- ================================
@@ -33,7 +34,12 @@ CREATE TABLE devices (
     device_description TEXT,
     condition_status VARCHAR(20) DEFAULT 'Good',
     borrow_count INT DEFAULT 0 CHECK (borrow_count >= 0),
-    location VARCHAR(50)
+    location VARCHAR(50),
+    price_per_day DECIMAL(10,2) DEFAULT 0,    
+    image_url VARCHAR(255),                    
+    specifications JSON,                      
+    maintenance_tips TEXT,                     
+    available_from VARCHAR(50)                
 );
 
 -- ================================
@@ -67,7 +73,8 @@ CREATE TABLE borrow_requests (
     return_date DATE,
 
     borrow_condition_snapshot VARCHAR(20),
-
+    review_rating  INT  CHECK (review_rating BETWEEN 1 AND 5),
+    review_comment TEXT,
     FOREIGN KEY (student_id) REFERENCES students(student_id) ON DELETE CASCADE,
     FOREIGN KEY (device_id) REFERENCES devices(device_id) ON DELETE CASCADE,
     FOREIGN KEY (approved_by) REFERENCES students(student_id)
@@ -82,7 +89,7 @@ CREATE TABLE waitlist (
     student_id VARCHAR(10) NOT NULL,
     request_time DATETIME DEFAULT CURRENT_TIMESTAMP,
     priority_level INT DEFAULT 0,
-    status ENUM('waiting','notified','expired','fulfilled','cancelled') DEFAULT 'waiting',
+    status ENUM('waiting','notified','offered','expired','fulfilled','cancelled') DEFAULT 'waiting',
     UNIQUE (device_id, student_id),
     FOREIGN KEY (device_id) REFERENCES devices(device_id) ON DELETE CASCADE,
     FOREIGN KEY (student_id) REFERENCES students(student_id) ON DELETE CASCADE
@@ -210,7 +217,7 @@ CREATE TABLE usage_stats (
 CREATE TABLE audit_logs (
     audit_id INT AUTO_INCREMENT PRIMARY KEY,
     table_name VARCHAR(50),
-    record_id INT,
+    record_id varchar(20),
     action ENUM('INSERT','UPDATE','DELETE'),
     performed_by VARCHAR(10),
     timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,

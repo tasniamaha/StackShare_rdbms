@@ -8,7 +8,7 @@ returns boolean
 DETERMINISTIC
 BEGIN
     declare cnt int;
-    select count(*) into cnt from students where student_email = p_email and p_email like '%iut-dhaka.edu';
+    select count(*) into cnt from students where student_email = p_email and p_email like '%@iut-dhaka.edu';
     return cnt>0;
 end$$
 
