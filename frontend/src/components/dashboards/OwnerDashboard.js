@@ -11,12 +11,21 @@ import {
   Users,
   History,
   Upload,
+  ShieldAlert,
+  AlertTriangle,
+  X,
+  DollarSign,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
+
+import { useAuth } from '../../context/AuthContext';
 
 import './OwnerDashboard.css';
 
 export default function OwnerDashboard() {
   const navigate = useNavigate();
+  const { user, reputation, hasLowReputation, isRestricted, hasViolations } = useAuth();
 
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
@@ -30,52 +39,87 @@ export default function OwnerDashboard() {
   const [activeLends, setActiveLends] = useState([]);
   const [pendingApprovals, setPendingApprovals] = useState([]);
 
+  // New: Mock fines & violations data (as lender/owner perspective)
+ const [finesAndViolations, setFinesAndViolations] = useState([
+    {
+      id: 'fv1',
+      borrower: 'Karim Hossain',
+      device: 'MacBook Pro 16" M2 Max',
+      deviceImage: 'https://images.unsplash.com/photo-1517336714731-48910b828f85?w=400&auto=format&fit=crop',
+      fineAmount: 2400,
+      reason: 'Non-return (18 days overdue)',
+      date: '2025-02-15',
+      status: 'Pending',
+      details: 'Full value charged after 14-day threshold. Reputation impact applied to borrower. Account suspended.',
+      isExpanded: false
+    },
+    {
+      id: 'fv2',
+      borrower: 'Nusrat Jahan',
+      device: 'DJI Mini 4 Pro Drone',
+      deviceImage: 'https://images.unsplash.com/photo-1506947411487-4a9d9a9d8e5f?w=400&auto=format&fit=crop',
+      fineAmount: 950,
+      reason: 'Severe damage – drone propeller broken',
+      date: '2025-03-02',
+      status: 'Disputed',
+      details: 'Borrower filed complaint. Awaiting admin review of before/after photos.',
+      isExpanded: false
+    },
+    {
+      id: 'fv3',
+      borrower: 'Sadia Khan',
+      device: 'Canon EOS R6 + Lens',
+      deviceImage: 'https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=400&auto=format&fit=crop',
+      fineAmount: 170,
+      reason: '2-day late return',
+      date: '2025-03-10',
+      status: 'Paid',
+      details: '10% fine applied. Reputation -7 to borrower. Fine paid via deposit deduction.',
+      isExpanded: false
+    },
+    {
+      id: 'fv4',
+      borrower: 'Prithvi Das',
+      device: 'Rode VideoMic Pro+',
+      deviceImage: 'https://images.unsplash.com/photo-1588104388727-1d4e8f0e5d5e?w=400&auto=format&fit=crop',
+      fineAmount: 0,
+      reason: 'Minor cosmetic wear – no charge',
+      date: '2025-03-05',
+      status: 'Resolved',
+      details: 'Borrower cleaned item. No fine applied. Reputation -5 (minor deduction).',
+      isExpanded: false
+    },
+    {
+      id: 'fv5',
+      borrower: 'Ayesha Siddiqua',
+      device: 'Godox AD600Pro Flash',
+      deviceImage: 'https://images.unsplash.com/photo-1588104388727-1d4e8f0e5d5e?w=400&auto=format&fit=crop',
+      fineAmount: 600,
+      reason: '4-day late return + repeated violation',
+      date: '2025-03-12',
+      status: 'Pending',
+      details: '20% fine + extra penalty for second late return in 60 days. Reputation -15.',
+      isExpanded: false
+    }
+  ]);
+
+  const [showFinesModal, setShowFinesModal] = useState(false);
+
   useEffect(() => {
-    // Simulate API loading (replace with real API calls later)
     setTimeout(() => {
       setStats({
         ownedDevices: 5,
         activeLends: 2,
         pendingRequests: 3,
-        reputation: 82,
+        reputation: user?.reputation || 82,
       });
 
       setOwnedDevices([
-        {
-          id: 1,
-          name: 'MacBook Pro 16" M2 Max',
-          status: 'Available',
-          category: 'Laptop',
-          image: 'https://images.unsplash.com/photo-1517336714731-48910b828f85?w=400&auto=format&fit=crop',
-        },
-        {
-          id: 2,
-          name: 'DJI Mini 4 Pro Drone',
-          status: 'Borrowed',
-          category: 'Drone',
-          image: 'https://images.unsplash.com/photo-1506947411487-4a9d9a9d8e5f?w=400&auto=format&fit=crop',
-        },
-        {
-          id: 3,
-          name: 'Canon EOS R6 + Lens',
-          status: 'Available',
-          category: 'Camera',
-          image: 'https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=400&auto=format&fit=crop',
-        },
-        {
-          id: 4,
-          name: 'Godox AD600Pro Flash',
-          status: 'Available',
-          category: 'Lighting',
-          image: 'https://images.unsplash.com/photo-1588104388727-1d4e8f0e5d5e?w=400&auto=format&fit=crop',
-        },
-        {
-          id: 5,
-          name: 'Rode VideoMic Pro+',
-          status: 'Borrowed',
-          category: 'Audio',
-          image: 'https://images.unsplash.com/photo-1588104388727-1d4e8f0e5d5e?w=400&auto=format&fit=crop',
-        },
+        { id: 1, name: 'MacBook Pro 16" M2 Max', status: 'Available', category: 'Laptop', image: 'https://images.unsplash.com/photo-1517336714731-48910b828f85?w=400&auto=format&fit=crop' },
+        { id: 2, name: 'DJI Mini 4 Pro Drone', status: 'Borrowed', category: 'Drone', image: 'https://images.unsplash.com/photo-1506947411487-4a9d9a9d8e5f?w=400&auto=format&fit=crop' },
+        { id: 3, name: 'Canon EOS R6 + Lens', status: 'Available', category: 'Camera', image: 'https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=400&auto=format&fit=crop' },
+        { id: 4, name: 'Godox AD600Pro Flash', status: 'Available', category: 'Lighting', image: 'https://images.unsplash.com/photo-1588104388727-1d4e8f0e5d5e?w=400&auto=format&fit=crop' },
+        { id: 5, name: 'Rode VideoMic Pro+', status: 'Borrowed', category: 'Audio', image: 'https://images.unsplash.com/photo-1588104388727-1d4e8f0e5d5e?w=400&auto=format&fit=crop' },
       ]);
 
       setActiveLends([
@@ -91,19 +135,16 @@ export default function OwnerDashboard() {
 
       setLoading(false);
     }, 1000);
-  }, []);
+  }, [user?.reputation]);
 
-  // Logout → clears auth data → redirects to Landing Page (/)
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     localStorage.removeItem('stackshare_token');
     localStorage.removeItem('stackshare_user');
-
     navigate('/', { replace: true });
   };
 
-  // Demo handlers for approve/reject (replace with real API calls later)
   const handleApprove = (id) => {
     alert(`Approved request #${id} — device lent!`);
     setPendingApprovals((prev) => prev.filter((req) => req.id !== id));
@@ -116,6 +157,21 @@ export default function OwnerDashboard() {
     setStats((prev) => ({ ...prev, pendingRequests: prev.pendingRequests - 1 }));
   };
 
+  const toggleFineExpand = (id) => {
+    setFinesAndViolations(prev =>
+      prev.map(fine =>
+        fine.id === id ? { ...fine, isExpanded: !fine.isExpanded } : fine
+      )
+    );
+  };
+
+  const openFinesModal = () => setShowFinesModal(true);
+  const closeFinesModal = () => setShowFinesModal(false);
+
+  const totalPendingFines = finesAndViolations
+    .filter(f => f.status === 'Pending')
+    .reduce((sum, f) => sum + f.fineAmount, 0);
+
   if (loading) {
     return (
       <div className="dashboard-loading">
@@ -127,14 +183,11 @@ export default function OwnerDashboard() {
 
   return (
     <div className="owner-dashboard">
-
-      {/* Background layers */}
       <div className="bg-image-layer"></div>
       <div className="bg-overlay-gradient"></div>
       <div className="bg-grid-lines"></div>
 
       <div className="dashboard-content-wrapper">
-
         {/* Header */}
         <motion.div
           className="top-control-bar"
@@ -153,53 +206,47 @@ export default function OwnerDashboard() {
           </button>
         </motion.div>
 
-        {/* Reputation & quick stats */}
+        {/* Reputation & stats */}
         <div className="top-stats-row">
           <motion.div
-            className="reputation-pill"
+            className={`reputation-pill ${hasLowReputation ? 'low-rep' : ''} ${isRestricted ? 'restricted' : ''}`}
             initial={{ opacity: 0, x: -40 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3 }}
           >
             <div className="rep-label">Reputation</div>
-            <div className="rep-value">{stats.reputation}</div>
+            <div className="rep-value">{reputation || stats.reputation}</div>
             <div className="rep-bar">
-              <div className="rep-progress" style={{ width: `${stats.reputation}%` }} />
+              <div className="rep-progress" style={{ width: `${reputation || stats.reputation}%` }} />
             </div>
+            {hasLowReputation && <div className="rep-warning">Low reputation</div>}
+            {isRestricted && <div className="rep-restricted">Account restricted</div>}
           </motion.div>
 
-          <motion.div
-            className="mini-stat"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-          >
+          <motion.div className="mini-stat" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
             <Package size={22} />
             <span>{stats.ownedDevices} devices</span>
           </motion.div>
 
-          <motion.div
-            className="mini-stat"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-          >
+          <motion.div className="mini-stat" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
             <Users size={22} />
             <span>{stats.activeLends} active lends</span>
           </motion.div>
 
-          <motion.div
-            className="mini-stat warning"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-          >
+          <motion.div className="mini-stat warning" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
             <AlertCircle size={22} />
             <span>{stats.pendingRequests} pending</span>
           </motion.div>
+
+          {hasViolations && (
+            <motion.div className="mini-stat violation" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.65 }}>
+              <ShieldAlert size={22} />
+              <span>Violations active</span>
+            </motion.div>
+          )}
         </div>
 
-        {/* Quick actions – now with prominent Add Device button */}
+        {/* Quick actions */}
         <div className="quick-actions-bar">
           <motion.button
             className="action-pill primary add-device-btn"
@@ -228,15 +275,19 @@ export default function OwnerDashboard() {
             <History size={20} />
             Lend History
           </motion.button>
+
+          <motion.button
+            className="action-pill warning"
+            whileHover={{ scale: 1.04 }}
+            onClick={openFinesModal}
+          >
+            <AlertTriangle size={20} />
+            Fines & Violations
+          </motion.button>
         </div>
 
         {/* Owned Devices */}
-        <motion.section
-          className="dashboard-panel"
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7 }}
-        >
+        <motion.section className="dashboard-panel" initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}>
           <div className="panel-heading">
             <h3>My Devices</h3>
             <span className="count-badge">{stats.ownedDevices}</span>
@@ -268,12 +319,7 @@ export default function OwnerDashboard() {
         </motion.section>
 
         {/* Active Lends */}
-        <motion.section
-          className="dashboard-panel"
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8 }}
-        >
+        <motion.section className="dashboard-panel" initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8 }}>
           <div className="panel-heading">
             <h3>Active Lends</h3>
             <span className="count-badge">{stats.activeLends}</span>
@@ -297,12 +343,7 @@ export default function OwnerDashboard() {
         </motion.section>
 
         {/* Pending Approval Requests */}
-        <motion.section
-          className="dashboard-panel urgent"
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.9 }}
-        >
+        <motion.section className="dashboard-panel urgent" initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.9 }}>
           <div className="panel-heading">
             <h3>Pending Approval Requests</h3>
             <span className="count-badge urgent">{stats.pendingRequests}</span>
@@ -331,6 +372,100 @@ export default function OwnerDashboard() {
           </div>
         </motion.section>
       </div>
+
+      {/* Fines & Violations Modal */}
+      {showFinesModal && (
+        <div className="modal-overlay" onClick={closeFinesModal}>
+          <motion.div
+            className="fines-modal"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="modal-header">
+              <h2>Fines & Violations Overview</h2>
+              <button className="close-modal-btn" onClick={closeFinesModal}>
+                <X size={28} />
+              </button>
+            </div>
+
+            <div className="modal-body">
+              <div className="fines-summary">
+                <div className="summary-card">
+                  <DollarSign size={32} />
+                  <div>
+                    <h4>Total Pending Fines</h4>
+                    <p className="total-fine-amount">
+                      ৳{totalPendingFines.toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+                <div className="summary-card">
+                  <AlertTriangle size={32} />
+                  <div>
+                    <h4>Active Violations</h4>
+                    <p>{finesAndViolations.filter(f => f.status !== 'Paid' && f.status !== 'Resolved').length}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="fines-list">
+                {finesAndViolations.map(fine => (
+                  <div key={fine.id} className={`fine-card ${fine.status.toLowerCase()}`}>
+                    <div className="fine-image-wrapper">
+                      <img src={fine.deviceImage} alt={fine.device} className="fine-image" />
+                    </div>
+
+                    <div className="fine-content">
+                      <div className="fine-header">
+                        <h4>{fine.device}</h4>
+                        <span className={`status-badge ${fine.status.toLowerCase()}`}>
+                          {fine.status}
+                        </span>
+                      </div>
+
+                      <div className="fine-amount">
+                        <DollarSign size={20} />
+                        {fine.fineAmount.toLocaleString()} BDT
+                      </div>
+
+                      <div className="fine-borrower">
+                        Borrower: <strong>{fine.borrower}</strong>
+                      </div>
+
+                      <div className="fine-reason">
+                        <strong>Reason:</strong> {fine.reason}
+                      </div>
+
+                      <div className="fine-date">
+                        Date: {fine.date}
+                      </div>
+
+                      <div className="fine-toggle" onClick={() => toggleFineExpand(fine.id)}>
+                        {fine.isExpanded ? (
+                          <>
+                            <ChevronUp size={18} /> Hide Details
+                          </>
+                        ) : (
+                          <>
+                            <ChevronDown size={18} /> View Details
+                          </>
+                        )}
+                      </div>
+
+                      {fine.isExpanded && (
+                        <div className="fine-details-expanded">
+                          {fine.details}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }
