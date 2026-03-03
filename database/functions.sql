@@ -45,7 +45,7 @@ DETERMINISTIC
 BEGIN
     declare cnt int;
 
-    select count(*) into cnt from borrow_requests where student_id = p_student_id and borrow_status in ('Borrowed', 'Overdue');
+    select count(*) into cnt from borrow_requests where student_id = p_student_id and borrow_status in ('Borrowed', 'Overdue', 'NotStarted');
 
     return cnt;
 END$$
