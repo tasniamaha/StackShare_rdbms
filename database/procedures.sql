@@ -79,7 +79,7 @@ BEGIN
 
     UPDATE borrow_requests
     SET approval_status = 'Approved',
-        borrow_status = 'Borrowed',
+        borrow_status = 'NotStarted',
         approved_by = p_approver_id,
         approved_at = NOW(),
         borrow_start_date = CURDATE(),
@@ -111,37 +111,52 @@ DELIMITER ;
 -- ================================
 DELIMITER $$
 CREATE PROCEDURE apply_fine(
-    IN p_borrow_id INT,
+    IN p_borrow_id  INT,
     IN p_student_id VARCHAR(10),
-    IN p_reason VARCHAR(255),
-    IN p_amount DECIMAL(10,2),
+    IN p_reason     VARCHAR(255),
+    IN p_amount     DECIMAL(10,2),
     IN p_imposed_by VARCHAR(10),
-    IN p_due_date DATE
+    IN p_due_date   DATE
 )
 BEGIN
-    DECLARE v_exists INT DEFAULT 0;
+    DECLARE v_exists  INT DEFAULT 0;
     DECLARE v_fine_id INT;
-    INSERT INTO fine_reports(
-        borrow_id, student_id, reason, fine_amount, fine_status, imposed_date, due_date, imposed_by
-    ) VALUES (
-        p_borrow_id, p_student_id, p_reason, p_amount, 'Pending', NOW(), p_due_date, p_imposed_by
-    );
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+
+    -- 1. Validate borrow_id FIRST before inserting anything
     SELECT COUNT(*) INTO v_exists
     FROM borrow_requests
     WHERE borrow_id = p_borrow_id;
 
     IF v_exists = 0 THEN
-        ROLLBACK;
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Invalid borrow_id for fine';
     END IF;
-    -- Notify student
+
+    -- 2. Insert fine only after validation passes
+    INSERT INTO fine_reports(
+        borrow_id, student_id, reason, fine_amount,
+        fine_status, imposed_date, due_date, imposed_by
+    )
+    VALUES(
+        p_borrow_id, p_student_id, p_reason, p_amount,
+        'Pending', NOW(), p_due_date, p_imposed_by
+    );
+
+    SET v_fine_id = LAST_INSERT_ID();
+
+    -- 3. Notify student
     INSERT INTO notifications(user_id, related_entity, related_id, message, notification_type)
-    VALUES (
-        p_student_id, 
-        'fine', 
-        LAST_INSERT_ID(), 
-        CONCAT('A fine of ', p_amount, ' has been imposed: ', p_reason), 
+    VALUES(
+        p_student_id,
+        'fine',
+        v_fine_id,
+        CONCAT('A fine of ৳', p_amount, ' has been imposed: ', p_reason),
         'Alert'
     );
 END$$
@@ -238,7 +253,7 @@ BEGIN
 
         -- Penalize reputation
         UPDATE students
-        SET reputation_score = reputation_score - 10
+        SET reputation_score = GREATEST(reputation_score - 10, 0)
         WHERE student_id = v_accused_student;
     END IF;
 END$$
