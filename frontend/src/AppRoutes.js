@@ -1,10 +1,7 @@
-// src/AppRoutes.js
 import { Routes, Route, Navigate } from "react-router-dom";
-import { useAuth } from "./context/AuthContext";   // ✅ FIXED PATH
+import { useAuth } from "./context/AuthContext";
 
-// ────────────────────────────────────────────────
-// Pages & Components
-// ────────────────────────────────────────────────
+// Pages
 import LandingPage from "./components/pages/LandingPage";
 import Login from "./components/auth/Login";
 import Register from "./components/auth/Register";
@@ -12,63 +9,92 @@ import Register from "./components/auth/Register";
 // Dashboards
 import BorrowerDashboard from "./components/dashboards/BorrowerDashboard";
 import OwnerDashboard from "./components/dashboards/OwnerDashboard";
+import AdminDashboard from "./components/dashboards/AdminDashboard";
 import AddDevice from "./components/dashboards/AddDevice";
 
 // Devices
 import DeviceList from "./components/devices/DeviceList";
 import DeviceDetails from "./components/devices/DeviceDetails";
 
-// Notifications
+// Others
 import Notifications from "./components/notifications/Notifications";
-
-// Borrow History
 import BorrowHistory from "./components/borrow/BorrowHistory";
-
-// Recommendations
 import Recommendations from "./components/dashboards/Recommendations";
 
-// ────────────────────────────────────────────────
-// Protected Route Component
-// ────────────────────────────────────────────────
+/* =========================================================
+   Protected Route
+   ========================================================= */
+
 const ProtectedRoute = ({ children, allowedRoles = [] }) => {
   const { isAuthenticated, user } = useAuth();
 
-  // Not logged in → send to login
+  // Not logged in
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  // Role restriction check
-  if (allowedRoles.length > 0 && !allowedRoles.includes(user?.role)) {
-    const redirectPath =
-      user?.role === "owner" || user?.role === "admin"
-        ? "/owner/dashboard"
-        : "/dashboard";
-
-    return <Navigate to={redirectPath} replace />;
+  // Role restriction
+  if (
+    allowedRoles.length > 0 &&
+    (!user || !allowedRoles.includes(user.role))
+  ) {
+    return <Navigate to="/" replace />;
   }
 
   return children;
 };
 
-// ────────────────────────────────────────────────
-// Routes
-// ────────────────────────────────────────────────
+/* =========================================================
+   Role-Based Dashboard Router
+   ========================================================= */
+
+const RoleBasedDashboard = () => {
+  const { user } = useAuth();
+
+  if (!user) return <Navigate to="/login" replace />;
+
+  switch (user.role) {
+    case "admin":
+      return <AdminDashboard />;
+    case "owner":
+      return <OwnerDashboard />;
+    case "borrower":
+    default:
+      return <BorrowerDashboard />;
+  }
+};
+
+/* =========================================================
+   Routes
+   ========================================================= */
+
 const AppRoutes = () => {
   return (
     <Routes>
+      {/* ================= PUBLIC ROUTES ================= */}
 
-      {/* Public */}
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
 
-      {/* Dashboards */}
+      {/* ================= SMART DASHBOARD ================= */}
+
       <Route
         path="/dashboard"
         element={
           <ProtectedRoute>
-            <BorrowerDashboard />
+            <RoleBasedDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* ================= EXPLICIT DASHBOARDS ================= */}
+
+      <Route
+        path="/admin/dashboard"
+        element={
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <AdminDashboard />
           </ProtectedRoute>
         }
       />
@@ -82,7 +108,8 @@ const AppRoutes = () => {
         }
       />
 
-      {/* Owner Actions */}
+      {/* ================= OWNER ACTIONS ================= */}
+
       <Route
         path="/owner/add-device"
         element={
@@ -92,7 +119,8 @@ const AppRoutes = () => {
         }
       />
 
-      {/* Devices */}
+      {/* ================= DEVICES ================= */}
+
       <Route
         path="/browse"
         element={
@@ -111,7 +139,8 @@ const AppRoutes = () => {
         }
       />
 
-      {/* History */}
+      {/* ================= HISTORY ================= */}
+
       <Route
         path="/history"
         element={
@@ -130,7 +159,8 @@ const AppRoutes = () => {
         }
       />
 
-      {/* Notifications */}
+      {/* ================= SYSTEM ================= */}
+
       <Route
         path="/notifications"
         element={
@@ -140,7 +170,6 @@ const AppRoutes = () => {
         }
       />
 
-      {/* Recommendations */}
       <Route
         path="/recommendations"
         element={
@@ -150,9 +179,9 @@ const AppRoutes = () => {
         }
       />
 
-      {/* 404 */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+      {/* ================= 404 ================= */}
 
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 };
