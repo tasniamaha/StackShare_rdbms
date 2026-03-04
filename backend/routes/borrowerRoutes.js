@@ -4,7 +4,6 @@ const router = express.Router();
 const borrowerController = require('../controllers/borrowerController');
 const authMiddleware = require('../middleware/authMiddleware');
 
-// All routes require authentication
 router.use(authMiddleware);
 
 // Dashboard
