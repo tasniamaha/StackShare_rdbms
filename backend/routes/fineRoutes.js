@@ -10,7 +10,6 @@ router.use(authMiddleware);
 
 router.get('/my-fines', fineController.getMyFines);
 
-// Get fines by student
 router.get('/student/:studentId', fineController.getFinesByStudent);
 //admin
 router.post('/', fineController.applyFine);
