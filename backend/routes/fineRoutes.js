@@ -7,7 +7,7 @@ const authMiddleware = require('../middleware/authMiddleware');
 // All routes require authentication
 router.use(authMiddleware);
 
-// Get my fines
+
 router.get('/my-fines', fineController.getMyFines);
 
 // Get fines by student
