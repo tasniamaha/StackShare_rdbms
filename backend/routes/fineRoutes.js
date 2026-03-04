@@ -11,7 +11,7 @@ router.use(authMiddleware);
 router.get('/my-fines', fineController.getMyFines);
 
 router.get('/student/:studentId', fineController.getFinesByStudent);
-//admin
+
 router.post('/', fineController.applyFine);
 
 router.put('/:id/pay', fineController.payFine);
