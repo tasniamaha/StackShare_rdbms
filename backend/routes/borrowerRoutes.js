@@ -6,7 +6,6 @@ const authMiddleware = require('../middleware/authMiddleware');
 
 router.use(authMiddleware);
 
-// Dashboard
 router.get('/dashboard', borrowerController.getDashboard);
 
 // Active borrows
