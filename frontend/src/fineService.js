@@ -104,9 +104,9 @@ export const shouldRestrictBorrowing = (reputation, violationCount, damageLevel 
   return { restricted: false };
 };
 
-// ────────────────────────────────────────────────
-// Reputation Change (on-time return bonus)
-// ────────────────────────────────────────────────
+
+
+
 export const calculateOnTimeBonus = (consecutiveSuccess) => {
   let bonus = POLICY_RULES.reputation.onTimeReturnBonus;
 
@@ -142,6 +142,7 @@ export default {
   getRepeatedFalseComplaintPenalty
 
 };
+
 
 
 
