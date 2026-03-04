@@ -3,7 +3,7 @@ import { BrowserRouter } from "react-router-dom";
 
 import AppRoutes from "./AppRoutes";
 import { AuthProvider } from "./context/AuthContext"; 
-
+//app part
 function App() {
   return (
     <BrowserRouter>
