@@ -16,7 +16,11 @@ import {
   X,
   DollarSign,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  MessageSquare,
+  Send,
+  Image as ImageIcon,
+  Trash2
 } from 'lucide-react';
 
 import { useAuth } from '../../context/AuthContext';
@@ -39,20 +43,8 @@ export default function OwnerDashboard() {
   const [activeLends, setActiveLends] = useState([]);
   const [pendingApprovals, setPendingApprovals] = useState([]);
 
-  // New: Mock fines & violations data (as lender/owner perspective)
- const [finesAndViolations, setFinesAndViolations] = useState([
-    {
-      id: 'fv1',
-      borrower: 'Karim Hossain',
-      device: 'MacBook Pro 16" M2 Max',
-      deviceImage: 'https://images.unsplash.com/photo-1517336714731-48910b828f85?w=400&auto=format&fit=crop',
-      fineAmount: 2400,
-      reason: 'Non-return (18 days overdue)',
-      date: '2025-02-15',
-      status: 'Pending',
-      details: 'Full value charged after 14-day threshold. Reputation impact applied to borrower. Account suspended.',
-      isExpanded: false
-    },
+  // Mock fines & violations (owner/lender view)
+const [finesAndViolations, setFinesAndViolations] = useState([
     {
       id: 'fv2',
       borrower: 'Nusrat Jahan',
@@ -104,6 +96,20 @@ export default function OwnerDashboard() {
   ]);
 
   const [showFinesModal, setShowFinesModal] = useState(false);
+  const [showComplaintModal, setShowComplaintModal] = useState(false);
+  const [complaintReason, setComplaintReason] = useState('');
+  const [complaintDetails, setComplaintDetails] = useState('');
+  const [complaintPhotos, setComplaintPhotos] = useState([]); // Array of File objects
+  const [isSubmittingComplaint, setIsSubmittingComplaint] = useState(false);
+
+  // Cleanup object URLs to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      complaintPhotos.forEach(file => {
+        if (file.preview) URL.revokeObjectURL(file.preview);
+      });
+    };
+  }, [complaintPhotos]);
 
   useEffect(() => {
     setTimeout(() => {
@@ -115,11 +121,8 @@ export default function OwnerDashboard() {
       });
 
       setOwnedDevices([
-        { id: 1, name: 'MacBook Pro 16" M2 Max', status: 'Available', category: 'Laptop', image: 'https://images.unsplash.com/photo-1517336714731-48910b828f85?w=400&auto=format&fit=crop' },
-        { id: 2, name: 'DJI Mini 4 Pro Drone', status: 'Borrowed', category: 'Drone', image: 'https://images.unsplash.com/photo-1506947411487-4a9d9a9d8e5f?w=400&auto=format&fit=crop' },
         { id: 3, name: 'Canon EOS R6 + Lens', status: 'Available', category: 'Camera', image: 'https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=400&auto=format&fit=crop' },
-        { id: 4, name: 'Godox AD600Pro Flash', status: 'Available', category: 'Lighting', image: 'https://images.unsplash.com/photo-1588104388727-1d4e8f0e5d5e?w=400&auto=format&fit=crop' },
-        { id: 5, name: 'Rode VideoMic Pro+', status: 'Borrowed', category: 'Audio', image: 'https://images.unsplash.com/photo-1588104388727-1d4e8f0e5d5e?w=400&auto=format&fit=crop' },
+        { id: 4, name: 'Godox AD600Pro Flash', status: 'Available', category: 'Lighting', image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTs1-SqVw8UPmI8FCm5euh4_Yt9fw9KJCsN_w&s' },
       ]);
 
       setActiveLends([
@@ -147,14 +150,14 @@ export default function OwnerDashboard() {
 
   const handleApprove = (id) => {
     alert(`Approved request #${id} — device lent!`);
-    setPendingApprovals((prev) => prev.filter((req) => req.id !== id));
-    setStats((prev) => ({ ...prev, pendingRequests: prev.pendingRequests - 1 }));
+    setPendingApprovals(prev => prev.filter(req => req.id !== id));
+    setStats(prev => ({ ...prev, pendingRequests: prev.pendingRequests - 1 }));
   };
 
   const handleReject = (id) => {
     alert(`Rejected request #${id}`);
-    setPendingApprovals((prev) => prev.filter((req) => req.id !== id));
-    setStats((prev) => ({ ...prev, pendingRequests: prev.pendingRequests - 1 }));
+    setPendingApprovals(prev => prev.filter(req => req.id !== id));
+    setStats(prev => ({ ...prev, pendingRequests: prev.pendingRequests - 1 }));
   };
 
   const toggleFineExpand = (id) => {
@@ -167,6 +170,79 @@ export default function OwnerDashboard() {
 
   const openFinesModal = () => setShowFinesModal(true);
   const closeFinesModal = () => setShowFinesModal(false);
+
+  const openComplaintModal = () => setShowComplaintModal(true);
+  const closeComplaintModal = () => {
+    setShowComplaintModal(false);
+    setComplaintReason('');
+    setComplaintDetails('');
+    // Cleanup previews
+    complaintPhotos.forEach(file => {
+      if (file.preview) URL.revokeObjectURL(file.preview);
+    });
+    setComplaintPhotos([]);
+  };
+
+  const handlePhotoChange = (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length + complaintPhotos.length > 5) {
+      alert("Maximum 5 photos allowed.");
+      return;
+    }
+const newPhotos = files.map(file => ({
+  file,
+  preview: URL.createObjectURL(file)
+}));
+
+    setComplaintPhotos(prev => [...prev, ...newPhotos]);
+  };
+
+  const removePhoto = (index) => {
+    setComplaintPhotos(prev => {
+      const photo = prev[index];
+      if (photo.preview) URL.revokeObjectURL(photo.preview);
+      return prev.filter((_, i) => i !== index);
+    });
+  };
+
+  const submitComplaint = async (e) => {
+    e.preventDefault();
+
+    if (!complaintReason.trim()) {
+      alert("Please select a reason for your complaint.");
+      return;
+    }
+
+    setIsSubmittingComplaint(true);
+
+    try {
+      // Prepare data (in real app: use FormData to send files to backend)
+      const complaintData = {
+        reason: complaintReason,
+        details: complaintDetails,
+        ownerId: user?.id || 'unknown',
+        photos: complaintPhotos.map(file => ({
+          name: file.name,
+          size: file.size,
+          type: file.type
+        })),
+        timestamp: new Date().toISOString()
+      };
+
+      console.log("Complaint submitted:", complaintData);
+
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 1200));
+
+      alert("Your complaint has been sent to the admin team. We'll review it soon.");
+      closeComplaintModal();
+    } catch (err) {
+      console.error("Error submitting complaint:", err);
+      alert("Failed to submit complaint. Please try again.");
+    } finally {
+      setIsSubmittingComplaint(false);
+    }
+  };
 
   const totalPendingFines = finesAndViolations
     .filter(f => f.status === 'Pending')
@@ -250,7 +326,7 @@ export default function OwnerDashboard() {
         <div className="quick-actions-bar">
           <motion.button
             className="action-pill primary add-device-btn"
-            whileHover={{ scale: 1.06, boxShadow: '0 0 25px rgba(0,240,255,0.4)' }}
+            whileHover={{ scale: 1.06 }}
             whileTap={{ scale: 0.96 }}
             onClick={() => navigate('/owner/add-device')}
           >
@@ -284,6 +360,15 @@ export default function OwnerDashboard() {
             <AlertTriangle size={20} />
             Fines & Violations
           </motion.button>
+
+          <motion.button
+            className="action-pill complain-btn"
+            whileHover={{ scale: 1.04 }}
+            onClick={openComplaintModal}
+          >
+            <MessageSquare size={20} />
+            Complain to Admin
+          </motion.button>
         </div>
 
         {/* Owned Devices */}
@@ -294,7 +379,7 @@ export default function OwnerDashboard() {
           </div>
 
           <div className="device-grid">
-            {ownedDevices.map((device) => (
+            {ownedDevices.map(device => (
               <motion.div
                 key={device.id}
                 className="device-card"
@@ -326,7 +411,7 @@ export default function OwnerDashboard() {
           </div>
 
           <div className="items-compact-list">
-            {activeLends.map((lend) => (
+            {activeLends.map(lend => (
               <div key={lend.id} className="compact-lend-item">
                 <div className="lend-info">
                   <div className="borrower-name">{lend.borrower}</div>
@@ -350,7 +435,7 @@ export default function OwnerDashboard() {
           </div>
 
           <div className="items-compact-list">
-            {pendingApprovals.map((req) => (
+            {pendingApprovals.map(req => (
               <div key={req.id} className="compact-request-item">
                 <div className="request-info">
                   <div className="requester-name">{req.requester}</div>
@@ -463,6 +548,107 @@ export default function OwnerDashboard() {
                 ))}
               </div>
             </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Complain to Admin Modal – with photo upload */}
+      {showComplaintModal && (
+        <div className="modal-overlay" onClick={closeComplaintModal}>
+          <motion.div
+            className="complaint-modal"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="modal-header">
+              <h2>File a Complaint</h2>
+              <button className="close-modal-btn" onClick={closeComplaintModal}>
+                <X size={28} />
+              </button>
+            </div>
+
+            <form onSubmit={submitComplaint} className="complaint-form">
+              <div className="form-group">
+                <label>Reason for Complaint *</label>
+                <select
+                  value={complaintReason}
+                  onChange={e => setComplaintReason(e.target.value)}
+                  required
+                >
+                  <option value="">Select a reason</option>
+                  <option value="damage-dispute">Damage dispute (borrower damaged item)</option>
+                  <option value="late-return">Repeated late returns</option>
+                  <option value="non-return">Non-return or lost item</option>
+                  <option value="misuse">Misuse or abuse of device</option>
+                  <option value="harassment">Harassment or inappropriate behavior</option>
+                  <option value="other">Other (please specify below)</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label>Additional Details (optional)</label>
+                <textarea
+                  rows="4"
+                  value={complaintDetails}
+                  onChange={e => setComplaintDetails(e.target.value)}
+                  placeholder="Describe the issue in detail (dates, device names, borrower names, what happened...)"
+                />
+              </div>
+
+              {/* Photo Upload – Optional */}
+              <div className="form-group">
+                <label>
+                  <ImageIcon size={18} /> Upload Photos (optional – max 5)
+                </label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handlePhotoChange}
+                  className="photo-input"
+                />
+                <p className="photo-hint">You can upload up to 5 images (jpg, png, max 5MB each)</p>
+
+                {/* Photo Previews */}
+                {complaintPhotos.length > 0 && (
+                  <div className="photo-preview-container">
+                    {complaintPhotos.map((file, index) => (
+                      <div key={index} className="photo-preview-item">
+                        <img
+                          src={file.preview}
+                          alt={`Preview ${index + 1}`}
+                          className="photo-preview"
+                        />
+                        <button
+                          type="button"
+                          className="remove-photo-btn"
+                          onClick={() => removePhoto(index)}
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <motion.button
+                type="submit"
+                className="submit-complaint-btn"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                disabled={isSubmittingComplaint}
+              >
+                {isSubmittingComplaint ? (
+                  <>Submitting...</>
+                ) : (
+                  <>
+                    <Send size={18} /> Submit Complaint
+                  </>
+                )}
+              </motion.button>
+            </form>
           </motion.div>
         </div>
       )}
