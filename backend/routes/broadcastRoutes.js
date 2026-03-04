@@ -4,28 +4,51 @@ const router = express.Router();
 const broadcastController = require('../controllers/broadcastController');
 const authMiddleware = require('../middleware/authMiddleware');
 
-// All routes require authentication
-router.use(authMiddleware);
+router.use(authMiddleware);  // all routes need auth
 
-// Create broadcast
-router.post('/', broadcastController.createBroadcast);
-
-// Get all open broadcasts
+// ================================
+// GET /api/broadcast
+// All open broadcasts — any authenticated user
+// ================================
 router.get('/', broadcastController.getAllBroadcasts);
 
-// Get my broadcasts
+// ================================
+// GET /api/broadcast/my-broadcasts
+// Must be before /:id to avoid route conflict
+// ================================
 router.get('/my-broadcasts', broadcastController.getMyBroadcasts);
 
-// Get broadcast by ID
+// ================================
+// POST /api/broadcast
+// Create broadcast — borrowers only
+// Body: { item_type, description, urgency_level }
+// Maps to broadcast_requests table
+// ================================
+router.post('/', broadcastController.createBroadcast);
+
+// ================================
+// GET /api/broadcast/:id
+// ================================
 router.get('/:id', broadcastController.getBroadcastById);
 
-// Respond to broadcast
+// ================================
+// POST /api/broadcast/:id/respond
+// Lender/owner responds with a device
+// Body: { device_id }
+// Maps to broadcast_responses table
+// ================================
 router.post('/:id/respond', broadcastController.respondToBroadcast);
 
-// Accept response
+// ================================
+// PUT /api/broadcast/:id/accept/:responseId
+// Borrower accepts a response
+// ================================
 router.put('/:id/accept/:responseId', broadcastController.acceptResponse);
 
-// Cancel broadcast
+// ================================
+// DELETE /api/broadcast/:id
+// Only the requester can cancel
+// ================================
 router.delete('/:id', broadcastController.cancelBroadcast);
 
 module.exports = router;
