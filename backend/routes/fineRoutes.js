@@ -16,7 +16,6 @@ router.get('/student/:studentId', fineController.getFinesByStudent);
 // Apply fine (Admin)
 router.post('/', fineController.applyFine);
 
-// Pay fine
 router.put('/:id/pay', fineController.payFine);
 
 // Waive fine (Admin)
