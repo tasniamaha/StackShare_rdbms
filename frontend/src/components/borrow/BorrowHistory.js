@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { History, Eye } from 'lucide-react';
-import './BorrowHistory.css'; // create minimal css or reuse dashboard styles
+import './BorrowHistory.css'; 
 
 export default function BorrowHistory() {
   const navigate = useNavigate();
