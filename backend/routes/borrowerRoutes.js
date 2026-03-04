@@ -18,7 +18,6 @@ router.get('/history', borrowerController.getBorrowHistory);
 // Recommendations
 router.get('/recommendations', borrowerController.getRecommendations);
 
-// Upcoming returns
 router.get('/upcoming-returns', borrowerController.getUpcomingReturns);
 
 module.exports = router;
