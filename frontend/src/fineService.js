@@ -16,6 +16,7 @@ import POLICY_RULES from '../utils/policyRules';
 // ────────────────────────────────────────────────
 // Helper: Calculate actual days late (ignores grace period)
 // ────────────────────────────────────────────────
+// helper and ignore periods
 export const getDaysLate = (dueDate, actualReturnDate = new Date()) => {
   const due = new Date(dueDate);
   const returned = new Date(actualReturnDate);
@@ -142,6 +143,7 @@ export default {
   getRepeatedFalseComplaintPenalty
 
 };
+
 
 
 
