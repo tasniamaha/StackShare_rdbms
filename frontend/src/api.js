@@ -19,7 +19,6 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// ================= Borrowers =================
 
 // Get borrower info by ID
 export const getStudentById = (studentId) => api.get(`/students/${studentId}`);
