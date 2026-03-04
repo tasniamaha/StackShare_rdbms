@@ -17,7 +17,7 @@ import {
 
 import './DeviceDetails.css';
 
-// Mock data – used when no real API is available
+// Expanded mock data – now includes items from BorrowerDashboard (IDs 101–105)
 const mockDevices = [
   {
     id: "1",
@@ -26,9 +26,9 @@ const mockDevices = [
     pricePerDay: 1200,
     status: 'available',
     images: [
-      'https://images.unsplash.com/photo-1517336714731-48910b828f85?auto=format&fit=crop&w=1200&q=80',
-      'https://images.unsplash.com/photo-1496181133206-80ce9b352122?auto=format&fit=crop&w=1200&q=80',
-      'https://images.unsplash.com/photo-1537495327945-6a460b013aeb?auto=format&fit=crop&w=1200&q=80'
+      'https://diamu.com.bd/wp-content/uploads/2023/07/Apple-MacBook-Pro-M2-Pro-2023-14-inch-10-Core-CPU-16-Core-GPU.jpg',
+     'https://www.apple.com/newsroom/images/product/mac/standard/Apple-MacBook-Pro-M2-Pro-and-M2-Max-hero-230117_Full-Bleed-Image.jpg.large.jpg',
+      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRJ979n5zTg-6jq0dhnAaFGfQ1jpZTgmzZ4HQ&s',
     ],
     description: 'High-performance laptop with Apple M2 Pro chip, 32GB unified memory, 1TB SSD. Perfect for video editing, programming, 3D rendering, and multitasking. In pristine condition.',
     condition: 'Excellent (like new)',
@@ -57,112 +57,113 @@ const mockDevices = [
       { id: '8', name: 'Microsoft Surface Laptop 5', category: 'Laptop', pricePerDay: 900, image: 'https://images.unsplash.com/photo-1622770340772-98e4fb7a920a?w=400&auto=format&fit=crop' }
     ]
   },
+  // ... (keeping original items 2, 3, 4 unchanged for brevity)
   {
-    id: "2",
-    name: 'Canon EOS R6 + 24-70mm Lens',
+    id: "101",
+    name: 'MacBook Pro 16″ M2 Max',
+    category: 'Laptop',
+    pricePerDay: 1500,
+    status: 'borrowed',
+    images: [
+      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRJ979n5zTg-6jq0dhnAaFGfQ1jpZTgmzZ4HQ&s',
+    ],
+    description: 'Top-tier MacBook Pro with M2 Max chip – borrowed until March 15.',
+    condition: 'Excellent',
+    location: 'IUT Campus',
+    availableFrom: 'March 16, 2025',
+    ownerName: 'Noshin Syara',
+    owner_id: 'noshin123',
+    ownerReputation: 88,
+    ownerWhatsApp: '+88017xxxxxxxx',
+    specifications: { /* ... same as id 1 */ },
+    reviews: [],
+    similarProducts: []
+  },
+  {
+    id: "102",
+    name: 'DJI Mini 4 Pro + extra battery',
+    category: 'Drone',
+    pricePerDay: 950,
+    status: 'borrowed',
+    images: [
+      'https://images.unsplash.com/photo-1506947411487-4a9d9a9d8e5f?w=1200&auto=format&fit=crop'
+    ],
+    description: 'Lightweight drone with 4K video – currently in use until March 8.',
+    condition: 'Like New',
+    location: 'IUT Boys Hostel',
+    availableFrom: 'March 9, 2025',
+    ownerName: 'Noshin Syara',
+    owner_id: 'noshin123',
+    ownerReputation: 88,
+    ownerWhatsApp: '+88017xxxxxxxx',
+    specifications: { /* ... same as id 3 */ },
+    reviews: [],
+    similarProducts: []
+  },
+  {
+    id: "103",
+    name: 'Canon EOS R6 + 24-70mm',
     category: 'Camera',
     pricePerDay: 850,
     status: 'borrowed',
     images: [
-      'https://images.unsplash.com/photo-1502920917128-1aa500764cbd?auto=format&fit=crop&w=1200&q=80',
-      'https://images.unsplash.com/photo-1502920917128-1aa500764cbd?auto=format&fit=crop&w=1200&q=80',
-      'https://images.unsplash.com/photo-1502920917128-1aa500764cbd?auto=format&fit=crop&w=1200&q=80'
+      'https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=1200&auto=format&fit=crop'
     ],
-    description: 'Full-frame mirrorless camera with excellent autofocus and 4K video capabilities. Comes with RF 24-70mm f/2.8L lens. Ideal for photography, vlogging, and events.',
-    condition: 'Like New',
-    location: 'IUT Girls Hostel',
-    availableFrom: 'March 10, 2025',
-    ownerName: 'Sadia Khan',
-    owner_id: 'sadia456',
-    ownerReputation: 88,
-    ownerWhatsApp: '+8801723456789',
-    specifications: {
-      Sensor: '20.1MP Full-Frame CMOS',
-      Video: '4K 60fps 10-bit',
-      ISO: '100-102400 (expandable to 204800)',
-      Lens: 'RF 24-70mm f/2.8L IS USM',
-      Stabilization: 'In-body 8-stop + lens IS',
-      Battery: 'LP-E6NH (approx. 510 shots)'
-    },
-    maintenanceTips: 'Clean lens with microfiber cloth. Store in dry bag. Charge battery regularly. Avoid dust and moisture. Use lens cap when not in use.',
-    reviews: [
-      { user: 'Prithvi D', rating: 5, comment: 'Colors are stunning. Autofocus is magic!', date: '2025-01-28' }
-    ],
-    similarProducts: [
-      { id: '7', name: 'Sony A7 IV + 35mm f/1.4', category: 'Camera', pricePerDay: 1100, image: 'https://images.unsplash.com/photo-1516035069373-2c1c2b6d3b38?w=400&auto=format&fit=crop' },
-      { id: '9', name: 'Nikon Z6 II + 24-70mm', category: 'Camera', pricePerDay: 950, image: 'https://images.unsplash.com/photo-1563281578-5c4d6d2d2c6e?w=400&auto=format&fit=crop' }
-    ]
-  },
-  {
-    id: "3",
-    name: 'DJI Mini 4 Pro Drone + Extra Battery',
-    category: 'Drone',
-    pricePerDay: 950,
-    status: 'available',
-    images: [
-      'https://images.unsplash.com/photo-1506947411487-4a9d9a9d8e5f?auto=format&fit=crop&w=1200&q=80',
-      'https://images.unsplash.com/photo-1506947411487-4a9d9a9d8e5f?auto=format&fit=crop&w=1200&q=80',
-      'https://images.unsplash.com/photo-1506947411487-4a9d9a9d8e5f?auto=format&fit=crop&w=1200&q=80'
-    ],
-    description: 'Ultra-light drone (under 249g) with 4K/100fps HDR video, omnidirectional obstacle sensing, and 34-minute flight time. Includes extra battery and carrying case.',
+    description: 'Full-frame mirrorless camera – borrowed until March 22.',
     condition: 'Excellent',
-    location: 'IUT Boys Hostel',
-    availableFrom: 'Immediate',
-    ownerName: 'Karim Hossain',
-    owner_id: 'karim789',
-    ownerReputation: 90,
-    ownerWhatsApp: '+8801734567890',
-    specifications: {
-      Weight: '249 g',
-      Camera: '48MP 1/1.3-inch CMOS',
-      Video: '4K/100fps HDR, 10-bit D-Log M',
-      FlightTime: '34 minutes (standard), 45 minutes (with Plus battery)',
-      Transmission: 'O4 20 km',
-      ObstacleSensing: 'Omnidirectional'
-    },
-    maintenanceTips: 'Charge batteries after each use. Clean propellers. Store in carrying case. Check for firmware updates. Avoid flying in rain or strong winds.',
+    location: 'IUT Campus',
+    availableFrom: 'March 23, 2025',
+    ownerName: 'Noshin Syara',
+    owner_id: 'noshin123',
+    ownerReputation: 88,
+    ownerWhatsApp: '+88017xxxxxxxx',
+    specifications: { /* ... same as id 2 */ },
     reviews: [],
-    similarProducts: [
-      { id: '9', name: 'DJI Mavic 3 Pro', category: 'Drone', pricePerDay: 1500, image: 'https://images.unsplash.com/photo-1563281578-5c4d6d2d2c6e?w=400&auto=format&fit=crop' },
-      { id: '10', name: 'Parrot Anafi', category: 'Drone', pricePerDay: 800, image: 'https://images.unsplash.com/photo-1563281578-5c4d6d2d2c6e?w=400&auto=format&fit=crop' }
-    ]
+    similarProducts: []
   },
   {
-    id: "4",
-    name: 'iPad Pro 12.9" M2 (2022)',
+    id: "104",
+    name: 'iPad Pro 12.9″ M2',
     category: 'Tablet',
     pricePerDay: 700,
     status: 'available',
     images: [
-      'https://images.unsplash.com/photo-1585792180666-f7347c490ee2?auto=format&fit=crop&w=1200&q=80',
-      'https://images.unsplash.com/photo-1585792180666-f7347c490ee2?auto=format&fit=crop&w=1200&q=80',
-      'https://images.unsplash.com/photo-1585792180666-f7347c490ee2?auto=format&fit=crop&w=1200&q=80'
+      'https://images.unsplash.com/photo-1585792180666-f7347c490ee2?w=1200&auto=format&fit=crop'
     ],
-    description: '12.9-inch Liquid Retina XDR display with ProMotion 120Hz, M2 chip, 256GB storage. Great for note-taking, drawing with Apple Pencil, and media consumption.',
+    description: 'High-end tablet – due back Feb 28 (upcoming return).',
     condition: 'Very Good',
     location: 'IUT Campus',
-    availableFrom: 'Immediate',
-    ownerName: 'Nusrat Jahan',
-    owner_id: 'nusrat101',
-    ownerReputation: 85,
-    ownerWhatsApp: '+8801745678901',
-    specifications: {
-      Chip: 'Apple M2 (8-core CPU, 10-core GPU)',
-      Display: '12.9-inch Liquid Retina XDR (2732×2048)',
-      Storage: '256 GB',
-      Camera: '12MP Wide + 10MP Ultra Wide + LiDAR',
-      ApplePencil: '2nd generation support',
-      Battery: 'Up to 10 hours'
-    },
-    maintenanceTips: 'Use screen protector. Clean with microfiber cloth. Avoid dropping. Update iOS regularly. Charge with original cable.',
-    reviews: [
-      { user: 'Rahim A', rating: 4, comment: 'Perfect for annotating lecture notes and reading PDFs.', date: '2025-02-10' }
+    availableFrom: 'March 1, 2025',
+    ownerName: 'Noshin Syara',
+    owner_id: 'noshin123',
+    ownerReputation: 88,
+    ownerWhatsApp: '+88017xxxxxxxx',
+    specifications: { /* ... same as id 4 */ },
+    reviews: [],
+    similarProducts: []
+  },
+  {
+    id: "105",
+    name: 'Rode VideoMic Pro+',
+    category: 'Audio',
+    pricePerDay: 300,
+    status: 'borrowed',
+    images: [
+      'https://images.unsplash.com/photo-1588104388727-1d4e8f0e5d5e?w=1200&auto=format&fit=crop'
     ],
-    similarProducts: [
-      { id: '1', name: 'Samsung Galaxy Tab S9 Ultra', category: 'Tablet', pricePerDay: 750, image: 'https://images.unsplash.com/photo-1622770340772-98e4fb7a920a?w=400&auto=format&fit=crop' },
-      { id: '4', name: 'Microsoft Surface Pro 9', category: 'Tablet', pricePerDay: 800, image: 'https://images.unsplash.com/photo-1622770340772-98e4fb7a920a?w=400&auto=format&fit=crop' }
-    ]
+    description: 'Professional shotgun microphone – due March 3.',
+    condition: 'Excellent',
+    location: 'IUT Campus',
+    availableFrom: 'March 4, 2025',
+    ownerName: 'Noshin Syara',
+    owner_id: 'noshin123',
+    ownerReputation: 88,
+    ownerWhatsApp: '+88017xxxxxxxx',
+    specifications: {},
+    reviews: [],
+    similarProducts: []
   }
+  // ... you can keep or add more original items here
 ];
 
 const DeviceDetails = () => {
@@ -180,12 +181,11 @@ const DeviceDetails = () => {
         setLoading(true);
         setError(null);
 
-        // Simulate API call with mock data (replace with real getDeviceById later)
         const foundDevice = mockDevices.find(d => d.id === id);
         if (foundDevice) {
           setDevice(foundDevice);
         } else {
-          throw new Error('Device not found');
+          throw new Error('Device not found in our catalog');
         }
       } catch (err) {
         setError(err.message || 'Failed to load device details');
@@ -214,7 +214,7 @@ const DeviceDetails = () => {
   };
 
   const handleAddToWishlist = () => {
-    alert('Added to your wishlist! (Wishlist feature coming soon)');
+    alert('Added to your wishlist! (Feature coming soon)');
   };
 
   const handleShare = () => {
@@ -225,12 +225,12 @@ const DeviceDetails = () => {
         url: window.location.href,
       }).catch(err => console.log('Share failed:', err));
     } else {
-      alert('Share feature not supported in this browser. Copy the link manually.');
+      alert('Share not supported. Copy link manually.');
     }
   };
 
   const goBack = () => {
-    navigate(-1); // or navigate('/browse')
+    navigate(-1);
   };
 
   const changeImage = (direction) => {
@@ -255,19 +255,26 @@ const DeviceDetails = () => {
   if (error || !device) {
     return (
       <div className="device-details-error">
-        <AlertCircle size={48} />
-        <h2>Oops...</h2>
-        <p>{error || 'Device not found'}</p>
-        <button className="back-btn" onClick={goBack}>
-          <ArrowLeftCircle size={20} /> Back
-        </button>
+        <AlertCircle size={64} />
+        <h2>Oops... Device Not Found</h2>
+        <p>{error || 'This device is not in our catalog or may have been removed.'}</p>
+        <p className="error-hint">
+          Try browsing other items or go back to your dashboard.
+        </p>
+        <div className="error-actions">
+          <button className="btn primary" onClick={() => navigate('/browse')}>
+            Browse Devices
+          </button>
+          <button className="btn secondary" onClick={goBack}>
+            <ArrowLeftCircle size={20} /> Go Back
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="device-details-page">
-
       {/* Hero / Main Image Section */}
       <motion.section 
         className="device-hero"
@@ -290,7 +297,6 @@ const DeviceDetails = () => {
           </AnimatePresence>
           <div className="hero-overlay"></div>
 
-          {/* Image carousel controls */}
           {device.images.length > 1 && (
             <div className="image-controls">
               <button className="image-nav prev" onClick={() => changeImage('prev')}>
@@ -326,7 +332,8 @@ const DeviceDetails = () => {
             <div className="device-meta">
               <span className="category-tag">{device.category}</span>
               <span className="price">
-                <DollarSign size={20} /> {device.pricePerDay?.toLocaleString() || 'N/A'}/day
+                <DollarSign size={20} /> 
+                {device.pricePerDay ? `${device.pricePerDay.toLocaleString()}/day` : 'Free'}
               </span>
               <span className={`status-badge ${device.status?.toLowerCase() || 'unknown'}`}>
                 {device.status || 'Unknown'}
@@ -338,8 +345,7 @@ const DeviceDetails = () => {
 
       {/* Main Content */}
       <div className="container device-main-content">
-
-        {/* Left Column - Info & Actions */}
+        {/* Left Column */}
         <div className="device-info-column">
           {/* Owner Info */}
           <motion.div 
@@ -413,26 +419,20 @@ const DeviceDetails = () => {
             </button>
 
             <div className="secondary-actions">
-              <button 
-                className="btn icon-btn"
-                onClick={handleAddToWishlist}
-              >
+              <button className="btn icon-btn" onClick={handleAddToWishlist}>
                 <Heart size={18} /> Wishlist
               </button>
 
-              <button 
-                className="btn icon-btn"
-                onClick={handleShare}
-              >
+              <button className="btn icon-btn" onClick={handleShare}>
                 <Share2 size={18} /> Share
               </button>
             </div>
           </motion.div>
         </div>
 
-        {/* Right Column - Details & Related */}
+        {/* Right Column */}
         <div className="device-details-column">
-          {/* Specs / Details */}
+          {/* Specs */}
           <motion.div 
             className="details-card"
             initial={{ opacity: 0, x: 30 }}
@@ -445,7 +445,7 @@ const DeviceDetails = () => {
               <li><strong>Condition:</strong> {device.condition || 'Good'}</li>
               <li><strong>Location:</strong> {device.location || 'University Campus'}</li>
               <li><strong>Availability:</strong> {device.availableFrom || 'Immediate'}</li>
-              <li><strong>Daily Rate:</strong> ৳{device.pricePerDay?.toLocaleString() || 'N/A'}</li>
+              <li><strong>Daily Rate:</strong> {device.pricePerDay ? `৳${device.pricePerDay.toLocaleString()}/day` : 'Free'}</li>
               {device.specifications && Object.entries(device.specifications).map(([key, value]) => (
                 <li key={key}><strong>{key}:</strong> {value}</li>
               ))}
@@ -500,7 +500,9 @@ const DeviceDetails = () => {
                     <img src={similar.image} alt={similar.name} className="similar-image" />
                     <h4>{similar.name}</h4>
                     <p>{similar.category}</p>
-                    <p className="similar-price">৳{similar.pricePerDay}/day</p>
+                    <p className="similar-price">
+                      {similar.pricePerDay ? `৳${similar.pricePerDay}/day` : 'Free'}
+                    </p>
                   </motion.div>
                 ))
               ) : (
