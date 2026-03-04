@@ -56,7 +56,7 @@ export const calculateDamagePenalty = (damageLevel, itemValue, repairCost = 0) =
     return { amount: 0, reputationDelta: 0, warning: false, freezeDays: 0 };
   }
 
-  // Parse componetion on amount
+ 
   let amount;
   if (repairCost > 0) {
     amount = repairCost;
@@ -142,6 +142,7 @@ export default {
   getRepeatedFalseComplaintPenalty
 
 };
+
 
 
 
