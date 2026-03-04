@@ -51,12 +51,12 @@ LEFT JOIN students s ON w.student_id = s.student_id;
 CREATE OR REPLACE VIEW view_student_reputation AS
 SELECT s.student_id,
        s.student_name,
-       s.reputation_score,
+       s.reputation_score,s.is_restricted,s.has_violations,s.borrow_status
        COUNT(CASE WHEN br.borrow_status = 'Borrowed' THEN 1 END) AS active_borrows,
        COUNT(CASE WHEN br.borrow_status = 'Overdue' THEN 1 END) AS overdue_borrows
 FROM students s
 LEFT JOIN borrow_requests br ON s.student_id = br.student_id
-GROUP BY s.student_id, s.student_name, s.reputation_score
+GROUP BY s.student_id, s.student_name, s.reputation_score, s.is_restricted, s.has_violations, s.borrow_status
 ORDER BY s.reputation_score DESC;
 
 -- ================================
@@ -74,7 +74,11 @@ SELECT dr.report_id,
        s2.student_name AS accused_name,
        dr.report_date,
        dr.damage_description,
-       dr.status
+       dr.status,
+       dr.admin_decision,
+       dr.fine_amount,
+       dr.before_image_url,
+       dr.after_image_url
 FROM damage_reports dr
 JOIN students s1 ON dr.reported_by = s1.student_id
 JOIN students s2 ON dr.accused_student = s2.student_id
@@ -87,7 +91,7 @@ ORDER BY dr.report_date ASC;
 -- Shows top 5 most borrowed devices
 -- ================================
 CREATE OR REPLACE VIEW view_top_borrowed_devices AS
-SELECT device_id, device_name, borrow_count
+SELECT device_id, device_name, borrow_count,device_category
 FROM devices
 ORDER BY borrow_count DESC
 LIMIT 5;
@@ -103,7 +107,7 @@ SELECT fr.student_id,
        COUNT(fr.fine_id) AS overdue_count
 FROM fine_reports fr
 JOIN students s ON fr.student_id = s.student_id
-WHERE fr.fine_status = 'Overdue'
+WHERE fr.fine_status IN ('Pending', 'Overdue')
 GROUP BY fr.student_id, s.student_name
 ORDER BY overdue_amount DESC;
 
@@ -115,11 +119,13 @@ CREATE OR REPLACE VIEW view_pending_notifications AS
 SELECT n.notification_id,
        n.user_id,
        s.student_name AS user_name,
+       n.title,
        n.related_entity,
        n.related_id,
        n.message,
        n.notification_type,
-       n.created_at
+       n.created_at,
+       n.is_read 
 FROM notifications n
 JOIN students s ON n.user_id = s.student_id
 WHERE n.is_read = FALSE
