@@ -38,7 +38,6 @@ export const calculateLateFine = (itemValue, dueDate, returnDate) => {
   return itemValue * POLICY_RULES.lateFines[1];
 };
 
-// Reputation deduction for late return
 export const calculateLateReputationDelta = (days) => {
   if (days >= 14) return POLICY_RULES.lateReputationDeductions['14+'];
   if (days >= 8) return POLICY_RULES.lateReputationDeductions['8+'];
@@ -143,3 +142,4 @@ export default {
   getRepeatedFalseComplaintPenalty
 
 };
+
