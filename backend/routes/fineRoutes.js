@@ -12,8 +12,7 @@ router.get('/my-fines', fineController.getMyFines);
 
 // Get fines by student
 router.get('/student/:studentId', fineController.getFinesByStudent);
-
-// Apply fine (Admin)
+//admin
 router.post('/', fineController.applyFine);
 
 router.put('/:id/pay', fineController.payFine);
