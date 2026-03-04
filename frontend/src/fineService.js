@@ -96,7 +96,7 @@ export const shouldRestrictBorrowing = (reputation, violationCount, damageLevel 
     return { restricted: true, reason: 'Reputation too low' };
   }
 
-  // Repeated violations
+  // repeted part
   if (damageLevel === 'moderate' && violationCount >= POLICY_RULES.repeatedViolations.moderateBorrowRestriction) {
     return { restricted: true, reason: 'Too many moderate violations' };
   }
@@ -142,5 +142,6 @@ export default {
   getRepeatedFalseComplaintPenalty
 
 };
+
 
 
