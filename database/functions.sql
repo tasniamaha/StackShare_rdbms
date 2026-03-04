@@ -8,7 +8,7 @@ returns boolean
 DETERMINISTIC
 BEGIN
     declare cnt int;
-    select count(*) into cnt from students where student_email = p_email and p_email like '%@iut-dhaka.edu';
+    select count(*) into cnt from students where student_email = p_email ;
     return cnt>0;
 end$$
 
@@ -28,7 +28,8 @@ end$$
 
 create function is_device_available(p_device_id int)
 returns boolean
-DETERMINISTIC
+
+reads sql data
 BEGIN
     declare status_val varchar(20);
 
@@ -41,13 +42,14 @@ END$$
 
 create function active_borrow_count(p_student_id varchar(10))
 returns int
-DETERMINISTIC
+
+reads sql data
 BEGIN
     declare cnt int;
 
     select count(*) into cnt from borrow_requests where student_id = p_student_id and borrow_status in ('Borrowed', 'Overdue', 'NotStarted');
 
-    return cnt;
+    return IFNULL(cnt, 0);
 END$$
 
 -- 5. Get Total Fines of a Student
@@ -55,6 +57,7 @@ END$$
 create function total_fine_amount(p_student_id varchar(10))
 returns decimal(10,2)
 DETERMINISTIC
+reads sql data
 BEGIN
     declare total decimal(10,2);
 
@@ -68,15 +71,15 @@ create function days_overdue(p_borrow_id INT)
 returns int
 DETERMINISTIC
 begin
-    declare due_date date;
+    declare v_due_date date;
 
-    select borrow_end_date into due_date from borrow_requests where borrow_id = p_borrow_id;
+    select borrow_end_date into v_due_date from borrow_requests where borrow_id = p_borrow_id;
 
-    if due_date is null or  CURDATE() <= due_date then
+    if v_due_date is null or  CURDATE() <= due_date then
         return 0;
     end if;
 
-    return datediff(CURDATE(), due_date);
+    return datediff(CURDATE(), v_due_date);
 END$$
 
 DELIMITER ;
