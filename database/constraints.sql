@@ -30,8 +30,10 @@ CHECK (return_date IS NULL OR borrow_start_date IS NULL OR return_date >= borrow
 -- ================================
 ALTER TABLE fine_reports
 ADD CONSTRAINT chk_fine_paid_status
-CHECK ((fine_status = 'Paid' AND fine_amount >= 0 AND paid_date IS NOT NULL)
-    OR (fine_status <> 'Paid'));
+CHECK (
+    (fine_status = 'Paid' AND paid_date IS NOT NULL)
+    OR (fine_status <> 'Paid')
+);
 
 -- ================================
 -- USAGE STATS: HOURS NON-NEGATIVE
@@ -41,15 +43,16 @@ ADD CONSTRAINT chk_hours_nonnegative
 CHECK (hours_used >= 0);
 
 -- ================================
--- DEVICE OWNERS: NO DUPLICATES
--- ================================
-ALTER TABLE device_owners
-ADD CONSTRAINT uq_device_owner UNIQUE (owner_id, device_id);
-
--- ================================
 -- DAMAGE REPORTS: VALID ADMIN DECISION
 -- ================================
 ALTER TABLE damage_reports
 ADD CONSTRAINT chk_fine_consistency
-CHECK ((fine_amount > 0 AND admin_decision IN ('Borrower_At_Fault','Owner_At_Fault'))
-       OR (fine_amount = 0 AND admin_decision IN ('Pending','No_Fault')));
+CHECK (
+    -- Decisions that can have a fine amount
+    (admin_decision IN ('Borrower_At_Fault', 'Owner_At_Fault', 'Split_Cost') 
+     AND fine_amount >= 0)
+    OR
+    -- Decisions that should have no fine
+    (admin_decision IN ('Pending', 'No_Fault', 'Request_More_Info') 
+     AND fine_amount = 0)
+);
