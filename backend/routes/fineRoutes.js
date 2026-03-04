@@ -20,7 +20,7 @@ router.put('/:id/pay', fineController.payFine);
 // Waive fine (Admin)
 router.put('/:id/waive', fineController.waiveFine);
 
-// Get overdue fines (Admin)
+// get override admin
 router.get('/overdue', fineController.getOverdueFines);
 
 module.exports = router;
