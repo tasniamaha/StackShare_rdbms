@@ -16,7 +16,11 @@ CREATE TABLE students (
     student_email VARCHAR(50) NOT NULL UNIQUE,
     student_dept VARCHAR(30) NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
-    role VARCHAR(10) DEFAULT 'student',
+    role ENUM('student','admin') NOT NULL DEFAULT 'student',
+    can_borrow BOOLEAN DEFAULT TRUE,
+    can_lend   BOOLEAN DEFAULT TRUE,
+    is_restricted    BOOLEAN DEFAULT FALSE,
+    has_violations   BOOLEAN DEFAULT FALSE,
     reputation_score INT DEFAULT 100 CHECK (reputation_score >= 0),
     borrow_status VARCHAR(20) DEFAULT 'Active',
     suspended_until DATE,
@@ -36,7 +40,7 @@ CREATE TABLE devices (
     borrow_count INT DEFAULT 0 CHECK (borrow_count >= 0),
     location VARCHAR(50),
     price_per_day DECIMAL(10,2) DEFAULT 0,    
-    image_url VARCHAR(255),                    
+    image_url JSON DEFAULT NULL,                    
     specifications JSON,                      
     maintenance_tips TEXT,                     
     available_from VARCHAR(50)                
@@ -122,11 +126,12 @@ CREATE TABLE damage_reports (
     report_date DATETIME DEFAULT CURRENT_TIMESTAMP,
     damage_description TEXT NOT NULL,
     status ENUM('Reported','Under_Review','Confirmed','Rejected','Resolved') DEFAULT 'Reported',
-    admin_decision ENUM('Pending','Borrower_At_Fault','Owner_At_Fault','No_Fault') DEFAULT 'Pending',
+    admin_decision ENUM('Pending','Borrower_At_Fault','Owner_At_Fault','No_Fault','Split_Cost','Request_More_Info') DEFAULT 'Pending',
     fine_amount DECIMAL(10,2) DEFAULT 0,
     fine_paid BOOLEAN DEFAULT FALSE,
     resolution_date DATETIME,
-
+    before_image_url VARCHAR(500) DEFAULT NULL,
+    after_image_url VARCHAR(500) DEFAULT NULL,
     FOREIGN KEY (borrow_id) REFERENCES borrow_requests(borrow_id) ON DELETE CASCADE,
     FOREIGN KEY (device_id) REFERENCES devices(device_id) ON DELETE CASCADE,
     FOREIGN KEY (reported_by) REFERENCES students(student_id),
@@ -177,7 +182,8 @@ CREATE TABLE fine_reports (
     paid_date DATE,
     imposed_by VARCHAR(10),
     remarks TEXT,
-
+    damage_report_id INT DEFAULT NULL,
+    FOREIGN KEY (damage_report_id) REFERENCES damage_reports(report_id)
     FOREIGN KEY (borrow_id) REFERENCES borrow_requests(borrow_id) ON DELETE CASCADE,
     FOREIGN KEY (student_id) REFERENCES students(student_id) ON DELETE CASCADE,
     FOREIGN KEY (imposed_by) REFERENCES students(student_id)
@@ -192,9 +198,10 @@ CREATE TABLE notifications (
     related_entity VARCHAR(50),
     related_id INT,
     message TEXT NOT NULL,
-    notification_type ENUM('Info','Warning','Alert','Reminder'),
+    notification_type ENUM('borrow_request','borrow_approved','borrow_rejected','return_reminder','damage_report','fine_issued','fine_paid','system','reputation_update'),
     is_read BOOLEAN DEFAULT FALSE,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    title VARCHAR(200) DEFAULT NULL,
     FOREIGN KEY (user_id) REFERENCES students(student_id) ON DELETE CASCADE
 );
 
