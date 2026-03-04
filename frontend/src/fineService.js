@@ -1,4 +1,3 @@
-
 import POLICY_RULES from '../utils/policyRules';
 
 /**

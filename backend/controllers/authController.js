@@ -1,24 +1,25 @@
 // controllers/authController.js
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const Student = require('../models/Student');
-const config = require('../config/config');
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const Student = require("../models/Student");
+const config = require("../config/config");
 
 // Register
 exports.register = async (req, res) => {
   try {
-    const { student_id, student_name, student_email, student_dept, password } = req.body;
+    const { student_id, student_name, student_email, student_dept, password } =
+      req.body;
 
     // Check if email exists
     const emailExists = await Student.emailExists(student_email);
     if (emailExists) {
-      return res.status(400).json({ message: 'Email already registered' });
+      return res.status(400).json({ message: "Email already registered" });
     }
 
     // Check if student ID exists
     const idExists = await Student.studentIdExists(student_id);
     if (idExists) {
-      return res.status(400).json({ message: 'Student ID already registered' });
+      return res.status(400).json({ message: "Student ID already registered" });
     }
 
     // Hash password
@@ -30,12 +31,12 @@ exports.register = async (req, res) => {
       student_name,
       student_email,
       student_dept,
-      password_hash
+      password_hash,
     });
 
-    res.status(201).json({ message: 'Registration successful' });
+    res.status(201).json({ message: "Registration successful" });
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 
@@ -47,41 +48,50 @@ exports.login = async (req, res) => {
     // Find student
     const student = await Student.findByEmail(student_email);
     if (!student) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+      return res.status(401).json({ message: "Invalid credentials" });
     }
 
     // Check password
     const isMatch = await bcrypt.compare(password, student.password_hash);
     if (!isMatch) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+      return res.status(401).json({ message: "Invalid credentials" });
     }
 
     // Check if suspended
     const isSuspended = await Student.isSuspended(student.student_id);
     if (isSuspended) {
-      return res.status(403).json({ message: 'Account is suspended' });
+      return res.status(403).json({ message: "Account is suspended" });
     }
 
-    // Generate token
+    // Generate token (include role and permission flags for convenience)
     const token = jwt.sign(
-      { student_id: student.student_id, student_email: student.student_email },
+      {
+        student_id: student.student_id,
+        student_email: student.student_email,
+        role: student.role,
+        can_borrow: student.can_borrow,
+        can_lend: student.can_lend,
+      },
       config.JWT_SECRET,
-      { expiresIn: config.JWT_EXPIRES_IN }
+      { expiresIn: config.JWT_EXPIRES_IN },
     );
 
     res.json({
-      message: 'Login successful',
+      message: "Login successful",
       token,
       user: {
         student_id: student.student_id,
         student_name: student.student_name,
         student_email: student.student_email,
         student_dept: student.student_dept,
-        reputation_score: student.reputation_score
-      }
+        role: student.role,
+        can_borrow: student.can_borrow,
+        can_lend: student.can_lend,
+        reputation_score: student.reputation_score,
+      },
     });
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 
@@ -89,14 +99,14 @@ exports.login = async (req, res) => {
 exports.getProfile = async (req, res) => {
   try {
     const student = await Student.getWithStats(req.user.student_id);
-    
+
     if (!student) {
-      return res.status(404).json({ message: 'Student not found' });
+      return res.status(404).json({ message: "Student not found" });
     }
 
     res.json(student);
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 
@@ -108,16 +118,56 @@ exports.updateProfile = async (req, res) => {
     await Student.update(req.user.student_id, {
       student_name,
       student_email,
-      student_dept
+      student_dept,
     });
 
-    res.json({ message: 'Profile updated successfully' });
+    res.json({ message: "Profile updated successfully" });
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 
 // Logout (client-side token removal)
 exports.logout = async (req, res) => {
-  res.json({ message: 'Logout successful' });
+  res.json({ message: "Logout successful" });
+};
+
+// Get me (returns current user from JWT)
+exports.getMe = async (req, res) => {
+  try {
+    const student = await Student.getWithStats(req.user.student_id);
+
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    res.json(student);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+// Get student status (reputation, restrictions, violations)
+exports.getStudentStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const student = await Student.findById(id);
+
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    res.json({
+      reputation_score: student.reputation_score,
+      is_restricted: student.is_restricted,
+      has_violations: student.has_violations,
+      borrow_status: student.borrow_status,
+      can_borrow: student.can_borrow,
+      can_lend: student.can_lend,
+      has_low_reputation: student.reputation_score < 50,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
 };

@@ -9,9 +9,8 @@ ADD CONSTRAINT chk_student_email
 CHECK (student_email LIKE '%@iut-dhaka.edu');
 
 ALTER TABLE students
--- Role must be either 'student', 'admin', or 'owner'
 ADD CONSTRAINT chk_student_role
-CHECK (role IN ('student', 'admin', 'owner'));
+CHECK (role IN ('student', 'admin'));
 
 
 -- ================================

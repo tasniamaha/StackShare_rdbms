@@ -1,8 +1,7 @@
 // controllers/ownerController.js
-const Device = require('../models/Device');
-const DeviceOwner = require('../models/DeviceOwner');
-const BorrowRequest = require('../models/BorrowRequest');
-const pool = require('../config/database');
+const Device = require("../models/Device");
+const DeviceOwner = require("../models/DeviceOwner");
+const BorrowRequest = require("../models/BorrowRequest");
 
 // Get owner dashboard
 exports.getDashboard = async (req, res) => {
@@ -21,10 +20,10 @@ exports.getDashboard = async (req, res) => {
     res.json({
       ownedDevices,
       activeLends,
-      pendingApprovals
+      pendingApprovals,
     });
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 
@@ -34,14 +33,20 @@ exports.getOwnedDevices = async (req, res) => {
     const devices = await DeviceOwner.getDevicesByOwner(req.user.student_id);
     res.json(devices);
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 
 // Add device
 exports.addDevice = async (req, res) => {
   try {
-    const { device_name, device_category, device_description, condition_status, location } = req.body;
+    const {
+      device_name,
+      device_category,
+      device_description,
+      condition_status,
+      location,
+    } = req.body;
     const owner_id = req.user.student_id;
 
     // Create device
@@ -50,18 +55,18 @@ exports.addDevice = async (req, res) => {
       device_category,
       device_description,
       condition_status,
-      location
+      location,
     });
 
     // Link owner to device
     await DeviceOwner.addOwner(owner_id, result.insertId);
 
     res.status(201).json({
-      message: 'Device added successfully',
-      device_id: result.insertId
+      message: "Device added successfully",
+      device_id: result.insertId,
     });
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 
@@ -74,14 +79,14 @@ exports.updateDevice = async (req, res) => {
     // Check ownership
     const isOwner = await DeviceOwner.isOwner(owner_id, id);
     if (!isOwner) {
-      return res.status(403).json({ message: 'Unauthorized' });
+      return res.status(403).json({ message: "Unauthorized" });
     }
 
     await Device.update(id, req.body);
 
-    res.json({ message: 'Device updated successfully' });
+    res.json({ message: "Device updated successfully" });
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 
@@ -94,14 +99,14 @@ exports.deleteDevice = async (req, res) => {
     // Check ownership
     const isOwner = await DeviceOwner.isOwner(owner_id, id);
     if (!isOwner) {
-      return res.status(403).json({ message: 'Unauthorized' });
+      return res.status(403).json({ message: "Unauthorized" });
     }
 
     await Device.delete(id);
 
-    res.json({ message: 'Device deleted successfully' });
+    res.json({ message: "Device deleted successfully" });
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 
@@ -111,27 +116,18 @@ exports.getActiveLends = async (req, res) => {
     const lends = await BorrowRequest.getActiveLends(req.user.student_id);
     res.json(lends);
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 
 // Get lend history
 exports.getLendHistory = async (req, res) => {
   try {
-    const [history] = await pool.execute(
-      `SELECT br.*, s.student_name, d.device_name
-       FROM borrow_requests br
-       JOIN students s ON br.student_id = s.student_id
-       JOIN devices d ON br.device_id = d.device_id
-       JOIN device_owners do ON d.device_id = do.device_id
-       WHERE do.owner_id = ? AND br.borrow_status = 'Returned'
-       ORDER BY br.return_date DESC
-       LIMIT 20`,
-      [req.user.student_id]
+    const history = await BorrowRequest.getLendHistoryByOwner(
+      req.user.student_id,
     );
-    
     res.json(history);
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
