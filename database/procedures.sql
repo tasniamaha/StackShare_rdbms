@@ -98,7 +98,7 @@ END$$
 
 DELIMITER ;
 
-DELIMITER ;
+
 -- ================================
 --  apply_fine
 -- Applies a fine to a student for a borrow or damage
@@ -151,7 +151,7 @@ BEGIN
         'fine',
         v_fine_id,
         CONCAT('A fine of ৳', p_amount, ' has been imposed: ', p_reason),
-        'Alert'
+        'system'
     );
 END$$
 DELIMITER ;
@@ -198,7 +198,7 @@ BEGIN
             'waitlist',
             p_device_id,
             'You have priority to borrow this device. Please respond within the allowed time.',
-            'Info'
+            'fine_issued'
         );
 
     END IF;
@@ -214,41 +214,72 @@ DELIMITER ;
 DELIMITER $$
 CREATE PROCEDURE process_damage_report(
     IN p_report_id INT,
-    IN p_admin_decision ENUM('Borrower_At_Fault','Owner_At_Fault','No_Fault'),
+    IN p_admin_decision ENUM('Borrower_At_Fault','Owner_At_Fault','No_Fault','Split_Cost','Request_More_Info'),
     IN p_fine_amount DECIMAL(10,2)
 )
 BEGIN
     DECLARE v_accused_student VARCHAR(10);
+    DECLARE v_borrow_id INT;
 
-    -- Get accused student
-    SELECT accused_student INTO v_accused_student
+    SELECT accused_student, borrow_id 
+    INTO v_accused_student, v_borrow_id
     FROM damage_reports
     WHERE report_id = p_report_id;
 
-    -- Update damage report
+    -- Step 1: Set to Confirmed first → trg_penalize_reputation fires here
     UPDATE damage_reports
-    SET status = 'Resolved',
+    SET status = 'Confirmed',
         admin_decision = p_admin_decision,
         fine_amount = p_fine_amount,
-        fine_paid = FALSE,
-        resolution_date = NOW()
+        fine_paid = FALSE
     WHERE report_id = p_report_id;
 
-    -- Apply fine if needed
+    -- Step 2: Apply fine if borrower is at fault
     IF p_admin_decision = 'Borrower_At_Fault' AND p_fine_amount > 0 THEN
         CALL apply_fine(
-            (SELECT borrow_id FROM damage_reports WHERE report_id = p_report_id),
+            v_borrow_id,              -- use variable instead of subquery
             v_accused_student,
             'Damage reported and confirmed by admin',
             p_fine_amount,
             'ADMIN',
             DATE_ADD(CURDATE(), INTERVAL 14 DAY)
         );
-
-        -- Penalize reputation
-        UPDATE students
-        SET reputation_score = GREATEST(reputation_score - 10, 0)
-        WHERE student_id = v_accused_student;
     END IF;
+
+    -- Step 3: Now mark as Resolved with resolution date
+    UPDATE damage_reports
+    SET status = 'Resolved',
+        resolution_date = NOW()
+    WHERE report_id = p_report_id;
+
+    -- reputation UPDATE removed — trigger handles it
+
+END$$
+
+
+DELIMITER $$
+CREATE PROCEDURE get_student_borrow_history(IN p_student_id VARCHAR(10))
+BEGIN
+    SELECT 
+        br.borrow_id,
+        d.device_name,
+        d.device_category,
+        br.borrow_start_date,
+        br.borrow_end_date,
+        br.return_date,
+        br.borrow_status,
+        br.approval_status,
+        br.borrow_condition_snapshot,
+        br.review_rating,
+        br.review_comment,
+        DATEDIFF(br.return_date, br.borrow_end_date) AS days_late
+    FROM borrow_requests br
+    JOIN devices d ON br.device_id = d.device_id
+    WHERE br.student_id = p_student_id
+    ORDER BY br.request_date DESC;
 END$$
 DELIMITER ;
+
+-- Usage:
+CALL get_student_borrow_history('STU001');
+CALL get_student_borrow_history('STU045');
