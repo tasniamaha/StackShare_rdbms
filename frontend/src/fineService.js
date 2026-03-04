@@ -1,4 +1,4 @@
-// src/services/fineService.js
+
 import POLICY_RULES from '../utils/policyRules';
 
 /**
@@ -141,4 +141,5 @@ export default {
   calculateOnTimeBonus,
   getFalseClaimPenalty,
   getRepeatedFalseComplaintPenalty
+
 };
