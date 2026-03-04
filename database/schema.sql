@@ -183,7 +183,7 @@ CREATE TABLE fine_reports (
     imposed_by VARCHAR(10),
     remarks TEXT,
     damage_report_id INT DEFAULT NULL,
-    FOREIGN KEY (damage_report_id) REFERENCES damage_reports(report_id)
+    FOREIGN KEY (damage_report_id) REFERENCES damage_reports(report_id),
     FOREIGN KEY (borrow_id) REFERENCES borrow_requests(borrow_id) ON DELETE CASCADE,
     FOREIGN KEY (student_id) REFERENCES students(student_id) ON DELETE CASCADE,
     FOREIGN KEY (imposed_by) REFERENCES students(student_id)
