@@ -4,7 +4,7 @@ const router = express.Router();
 const fineController = require('../controllers/fineController');
 const authMiddleware = require('../middleware/authMiddleware');
 
-// All routes require authentication
+// log in parts
 router.use(authMiddleware);
 
 
