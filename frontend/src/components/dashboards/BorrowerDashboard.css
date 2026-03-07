@@ -24,8 +24,11 @@
 .bg-image-layer {
   position: absolute;
   inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: brightness(0.38) contrast(0.88) saturate(0.78);
   z-index: 0;
-  filter: brightness(0.95) contrast(1.05);
 }
 
 .bg-overlay-gradient {
@@ -765,10 +768,4 @@
 .submit-return-btn:hover {
   transform: scale(1.03);
   box-shadow: 0 10px 25px rgba(0,240,255,0.3);
-}
-
-.borrower-dashboard {
-  position: relative;
-  min-height: 100vh;
-  background-color: #000; /* fallback */
 }

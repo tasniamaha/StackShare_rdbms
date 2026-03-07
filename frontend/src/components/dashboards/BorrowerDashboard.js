@@ -239,16 +239,14 @@ export default function BorrowerDashboard() {
   return (
     <div
       className="borrower-dashboard"
+      style={{
+        backgroundImage: `url(${dashboardBg})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}
     >
-     <div
-  className="bg-image-layer"
-  style={{
-    backgroundImage: `url(${dashboardBg})`,
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    backgroundRepeat: "no-repeat"
-  }}
-></div>
+      <div className="bg-image-layer"></div>
       <div className="bg-overlay-gradient"></div>
       <div className="bg-grid-lines"></div>
 

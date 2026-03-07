@@ -22,26 +22,13 @@
   overflow-x: hidden;
 }
 
+/* Background layers – same as borrower dashboard for consistency */
 .bg-image-layer {
   position: absolute;
   inset: 0;
-  background-position: center;
-  background-size: cover;
-  background-repeat: no-repeat;
-
-  /* Make image brighter */
-  filter: brightness(0.95) contrast(1.05);
-
+  background: url('../../assets/image/borrower_dashboard.jpg') center/cover no-repeat;
+  filter: brightness(0.38) contrast(0.88) saturate(0.78);
   z-index: 0;
-  pointer-events: none;
-}
-
-.bg-image-layer::after {
-  background: radial-gradient(
-    circle at center,
-    rgba(0,0,0,0.05),
-    rgba(0,0,0,0.55)
-  );
 }
 
 .bg-overlay-gradient {

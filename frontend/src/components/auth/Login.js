@@ -1,53 +1,61 @@
 // src/components/auth/Login.js
 import { useState, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Loader2 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import "./Login.css";
 
 const Login = () => {
   const { login } = useAuth();
   const location = useLocation();
-  const navigate = useNavigate();
+
+  const [step, setStep] = useState(1);
 
   const [form, setForm] = useState({
     student_email: "",
     password: "",
-    role: "",
-    subRole: ""
+    role: "",      // 'student' or 'admin'
+    subRole: ""    // 'borrower' or 'lender'
   });
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Auto-fill from URL intent (?intent=lender or ?intent=borrower)
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
     const intent = urlParams.get("intent");
 
     if (intent === "lender") {
-      setForm({
-        student_email: "",
-        password: "",
+      setForm(prev => ({
+        ...prev,
         role: "student",
         subRole: "lender"
-      });
-    } else if (intent === "borrower") {
-      setForm({
-        student_email: "",
-        password: "",
-        role: "student",
-        subRole: "borrower"
-      });
+      }));
+      setStep(3);
     }
   }, [location.search]);
 
+  const handleRoleSelect = (role) => {
+    setForm(prev => ({ ...prev, role }));
+    setError("");
+
+    if (role === "admin") {
+      setStep(3);
+    } else {
+      setStep(2);
+    }
+  };
+
+  const handleSubRoleSelect = (subRole) => {
+    setForm(prev => ({ ...prev, subRole }));
+    setStep(3);
+    setError("");
+  };
+
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({
+    setForm(prev => ({
       ...prev,
-      [name]: value
+      [e.target.name]: e.target.value
     }));
     setError("");
   };
@@ -58,9 +66,8 @@ const Login = () => {
     setLoading(true);
 
     try {
-      // Basic validation
       if (!form.student_email.trim() || !form.password.trim()) {
-        throw new Error("Email and password are required");
+        throw new Error("Please fill in both fields");
       }
 
       if (!form.role) {
@@ -71,52 +78,42 @@ const Login = () => {
         throw new Error("Please select Borrower or Lender");
       }
 
-      // Fake login delay
-      await new Promise((resolve) => setTimeout(resolve, 1200));
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
-      // ── Determine dashboard path ──
-      let dashboardPath = "/dashboard";
+      // 🔥 IMPORTANT FIX: Normalize final role
+      let finalRole;
 
       if (form.role === "admin") {
-        dashboardPath = "/admin/dashboard";
-      } else if (form.role === "student") {
-        if (form.subRole === "lender") {
-          dashboardPath = "/owner/dashboard";
-        } else if (form.subRole === "borrower") {
-          dashboardPath = "/dashboard";
-        }
+        finalRole = "admin";
+      } else if (form.subRole === "borrower") {
+        finalRole = "borrower";
+      } else if (form.subRole === "lender") {
+        finalRole = "owner"; // or "lender" depending on your routing
       }
 
-      // Debug logs — very important for diagnosing!
-      console.log("LOGIN DEBUG:");
-      console.log("  role:", form.role);
-      console.log("  subRole:", form.subRole || "(none)");
-      console.log("  calculated path:", dashboardPath);
-
-      // Fake user & token
       const fakeUser = {
         student_email: form.student_email.trim(),
         student_name: "Demo User",
-        role: form.role,
-        subRole: form.subRole || null,
+        role: finalRole
       };
 
-      const fakeToken = "fake-jwt-" + Date.now();
+      const fakeToken = "fake-jwt-token-" + Date.now();
 
-      // Update auth context
       login(fakeUser, fakeToken);
-
-      // Small delay to allow context update (helps in React 18 strict mode)
-      await new Promise((resolve) => setTimeout(resolve, 400));
-
-      // Redirect
-      navigate(dashboardPath, { replace: true });
 
     } catch (err) {
       setError(err.message || "Login failed. Please try again.");
-      console.error("Login error:", err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const goBack = () => {
+    if (step === 3) {
+      if (form.role === "student") setStep(2);
+      else setStep(1);
+    } else if (step === 2) {
+      setStep(1);
     }
   };
 
@@ -134,96 +131,107 @@ const Login = () => {
         </div>
 
         {error && (
-          <motion.div className="error-message" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+          <motion.div
+            className="error-message"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+          >
             {error}
           </motion.div>
         )}
 
-        <motion.form
-          onSubmit={handleLogin}
-          className="auth-form"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-        >
-          {/* Role */}
-          <div className="form-group">
-            <label>Role *</label>
-            <select name="role" value={form.role} onChange={handleChange} required>
-              <option value="">Select role</option>
-              <option value="student">Student</option>
-              <option value="admin">Admin</option>
-            </select>
+        {step === 1 && (
+          <div className="role-selection">
+            <h3>I am a...</h3>
+            <div className="role-buttons">
+              <motion.button
+                className="role-btn"
+                whileHover={{ scale: 1.05 }}
+                onClick={() => handleRoleSelect("student")}
+              >
+                Student
+              </motion.button>
+
+              <motion.button
+                className="role-btn admin-role"
+                whileHover={{ scale: 1.05 }}
+                onClick={() => handleRoleSelect("admin")}
+              >
+                Admin
+              </motion.button>
+            </div>
           </div>
+        )}
 
-          {/* Sub-role — only shown if role = student */}
-          {form.role === "student" && (
-            <motion.div
-              className="form-group"
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              transition={{ duration: 0.3 }}
-            >
-              <label>Student Type *</label>
-              <select name="subRole" value={form.subRole} onChange={handleChange} required>
-                <option value="">Select type</option>
-                <option value="borrower">Borrower</option>
-                <option value="lender">Lender</option>
-              </select>
-            </motion.div>
-          )}
+        {step === 2 && (
+          <div className="sub-role-selection">
+            <h3>As a student, I want to be a...</h3>
+            <div className="role-buttons">
+              <motion.button
+                className="role-btn"
+                whileHover={{ scale: 1.05 }}
+                onClick={() => handleSubRoleSelect("borrower")}
+              >
+                Borrower
+              </motion.button>
 
-          {/* Email */}
-          <div className="form-group">
-            <label>Email *</label>
-            <input
-              type="email"
-              name="student_email"
-              placeholder="yourname@iut-dhaka.edu"
-              value={form.student_email}
-              onChange={handleChange}
-              required
-            />
+              <motion.button
+                className="role-btn"
+                whileHover={{ scale: 1.05 }}
+                onClick={() => handleSubRoleSelect("lender")}
+              >
+                Lender
+              </motion.button>
+            </div>
+
+            <button className="back-link" onClick={goBack}>
+              ← Back
+            </button>
           </div>
+        )}
 
-          {/* Password */}
-          <div className="form-group">
-            <label>Password *</label>
-            <input
-              type="password"
-              name="password"
-              placeholder="••••••••"
-              value={form.password}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          <motion.button
-            type="submit"
-            className="btn-primary"
-            disabled={loading}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
+        {step === 3 && (
+          <motion.form
+            onSubmit={handleLogin}
+            className="auth-form"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
           >
-            {loading ? (
-              <>
-                <Loader2 size={18} className="spin" /> Signing in...
-              </>
-            ) : (
-              "Sign In"
-            )}
-          </motion.button>
-        </motion.form>
+            <div className="form-group">
+              <label>Email</label>
+              <input
+                type="email"
+                name="student_email"
+                value={form.student_email}
+                onChange={handleChange}
+                required
+              />
+            </div>
 
-        <div className="auth-footer">
-          <p>
-            Don't have an account?{" "}
-            <a href="/register" className="auth-link">
-              Register here
-            </a>
-          </p>
-        </div>
+            <div className="form-group">
+              <label>Password</label>
+              <input
+                type="password"
+                name="password"
+                value={form.password}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <motion.button
+              type="submit"
+              className="btn-primary"
+              disabled={loading}
+            >
+              {loading ? "Signing in..." : "Sign In"}
+            </motion.button>
+
+            <button type="button" className="back-link" onClick={goBack}>
+              ← Back
+            </button>
+          </motion.form>
+        )}
       </motion.div>
     </div>
   );
