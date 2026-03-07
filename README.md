@@ -28,8 +28,7 @@ Borrowers can track their items, see upcoming reservations, and get smart recomm
 - 📦 Manage listed devices  
 - 📊 Track active lends & pending returns  
 - 🔍 Monitor borrower activity
-- 
-
+  
 ### 🎨 UI & Experience
 - Smooth animations using React.js + Framer Motion  
 - Fully responsive design  
@@ -53,8 +52,6 @@ Borrowers can track their items, see upcoming reservations, and get smart recomm
 - CORS  
 - Body-Parser  
 
----
-
 ## 📂 Project Structure
 
 StackShare/
@@ -77,10 +74,6 @@ StackShare/
 │
 └── README.md
 
----
-
-## ⚡ Getting Started
-
 ### ✅ Prerequisites
 - Node.js (v14+)
 - cd backend
@@ -93,10 +86,6 @@ node server.js
 The app will run on:
 http://localhost:3000
 
----
-
-
-
 ## 📜 License
 MIT license 
 
@@ -105,6 +94,5 @@ A Relational Database Project by -
 Noshin Syara
 Tasnia Rahman Maha &
 Akbari Madina
-- npm (v6+)
 
 ### 🖥 Backend Setup
