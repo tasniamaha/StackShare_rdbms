@@ -375,3 +375,82 @@
     grid-template-columns: 1fr;
   }
 }
+/* Borrow Button */
+.borrow-btn {
+  margin-top: 1rem;
+  padding: 0.8rem 1.4rem;
+  background: linear-gradient(90deg, #ff00d4, #c300ff);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  transition: all 0.3s;
+}
+
+.borrow-btn:hover {
+  transform: scale(1.03);
+  box-shadow: 0 10px 25px rgba(195,0,255,0.35);
+}
+
+/* Borrow Modal */
+.borrow-modal {
+  background: rgba(18, 12, 38, 0.95);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 580px;
+  padding: 2rem;
+  border: 1px solid rgba(0,240,255,0.35);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 0 40px rgba(0,240,255,0.3);
+}
+
+.borrow-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+  margin-top: 1.5rem;
+}
+
+.borrow-form .form-group label {
+  color: #b0e0ff;
+  font-weight: 600;
+}
+
+.borrow-form input[type="date"],
+.borrow-form input[type="text"],
+.borrow-form textarea {
+  padding: 0.9rem;
+  background: rgba(0,0,0,0.45);
+  border: 1px solid rgba(0,240,255,0.3);
+  border-radius: 10px;
+  color: #f0f4ff;
+  width: 100%;
+  font-size: 1rem;
+}
+
+.borrow-form textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.submit-borrow-btn {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: linear-gradient(90deg, #00f0ff, #00c8e0);
+  color: #000;
+  border: none;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+}
+
+.submit-borrow-btn:hover {
+  transform: scale(1.03);
+  box-shadow: 0 10px 25px rgba(0,240,255,0.3);
+}

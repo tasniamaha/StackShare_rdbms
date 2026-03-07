@@ -1,14 +1,32 @@
-// src/context/AuthContext.js
-import {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useCallback
-} from "react";
+// src/context/AuthContext.jsx
+import { Loader2 } from "lucide-react";
+import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
 const AuthContext = createContext();
+
+/* =========================================================
+   Helper: Normalize Role
+   Student + subRole → real role mapping
+========================================================= */
+
+const normalizeRole = (user) => {
+  if (!user) return user;
+
+  return {
+    ...user,
+    role:
+      user.role === "student" && user.subRole === "lender"
+        ? "owner"
+        : user.role === "student" && user.subRole === "borrower"
+        ? "borrower"
+        : user.role,
+  };
+};
+
+/* =========================================================
+   Auth Provider
+========================================================= */
 
 export function AuthProvider({ children }) {
   const navigate = useNavigate();
@@ -17,28 +35,7 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   /* =====================================================
-     Helper: Redirect Based On Role
-  ====================================================== */
-
-  const redirectByRole = (userData) => {
-    if (!userData?.role) return;
-
-    switch (userData.role) {
-      case "admin":
-        navigate("/admin/dashboard", { replace: true });
-        break;
-      case "owner":
-        navigate("/owner/dashboard", { replace: true });
-        break;
-      case "borrower":
-      default:
-        navigate("/dashboard", { replace: true });
-        break;
-    }
-  };
-
-  /* =====================================================
-     Load Stored Authentication On App Start
+     Load stored auth on app start
   ====================================================== */
 
   useEffect(() => {
@@ -53,14 +50,18 @@ export function AuthProvider({ children }) {
 
       const parsedUser = JSON.parse(storedUser);
 
-      if (!parsedUser?.role) {
+      if (!parsedUser || typeof parsedUser !== "object") {
         clearAuth();
         return;
       }
 
-      setUser(parsedUser);
-      redirectByRole(parsedUser);
+      const enrichedUser = normalizeRole({
+        ...parsedUser,
+        reputation: parsedUser.reputation ?? 80,
+        violationCount: parsedUser.violationCount ?? 0,
+      });
 
+      setUser(enrichedUser);
     } catch (err) {
       console.error("Auth load error:", err);
       clearAuth();
@@ -75,38 +76,37 @@ export function AuthProvider({ children }) {
 
   const login = useCallback((userData, token) => {
     try {
+      const enrichedUser = normalizeRole({
+        ...userData,
+        reputation: userData.reputation ?? 80,
+        violationCount: userData.violationCount ?? 0,
+      });
+
       localStorage.setItem("stackshare_token", token);
-      localStorage.setItem("stackshare_user", JSON.stringify(userData));
+      localStorage.setItem("stackshare_user", JSON.stringify(enrichedUser));
 
-      setUser(userData);
+      setUser(enrichedUser);
 
-      redirectByRole(userData);
-
+      return enrichedUser;
     } catch (err) {
-      console.error("Login storage error:", err);
+      console.error("Login error:", err);
+      throw err;
     }
   }, []);
 
   /* =====================================================
-     Logout Function
+     Logout
   ====================================================== */
 
   const logout = useCallback(() => {
-    try {
-      localStorage.removeItem("stackshare_token");
-      localStorage.removeItem("stackshare_user");
-
-      setUser(null);
-
-      navigate("/", { replace: true });
-
-    } catch (err) {
-      console.error("Logout error:", err);
-    }
-  }, []);
+    localStorage.removeItem("stackshare_token");
+    localStorage.removeItem("stackshare_user");
+    setUser(null);
+    navigate("/", { replace: true });
+  }, [navigate]);
 
   /* =====================================================
-     Clear Auth Helper
+     Clear Auth
   ====================================================== */
 
   const clearAuth = useCallback(() => {
@@ -114,19 +114,10 @@ export function AuthProvider({ children }) {
     localStorage.removeItem("stackshare_user");
     setUser(null);
     navigate("/", { replace: true });
-  }, []);
+  }, [navigate]);
 
   /* =====================================================
-     Role Helpers
-  ====================================================== */
-
-  const isAuthenticated = !!user;
-  const isAdmin = user?.role === "admin";
-  const isOwner = user?.role === "owner";
-  const isBorrower = user?.role === "borrower";
-
-  /* =====================================================
-     Context Value
+     Helpers
   ====================================================== */
 
   const value = {
@@ -136,25 +127,33 @@ export function AuthProvider({ children }) {
     logout,
     clearAuth,
 
-    isAuthenticated,
-    isAdmin,
-    isOwner,
-    isBorrower
+    isAuthenticated: !!user,
+    isAdmin: user?.role === "admin",
+    isOwner: user?.role === "owner",
+    isBorrower: user?.role === "borrower",
+
+    hasLowReputation: user?.reputation < 30,
+    isRestricted: user?.reputation < 20,
+    hasViolations: user?.violationCount > 0,
+
+    reputation: user?.reputation ?? 80,
+    violationCount: user?.violationCount ?? 0,
   };
+
+  /* =====================================================
+     Loading UI
+  ====================================================== */
 
   if (loading) {
     return (
       <div className="auth-loading">
+        <Loader2 className="spin" size={48} />
         <p>Checking authentication...</p>
       </div>
     );
   }
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export const useAuth = () => {

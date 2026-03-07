@@ -1,5 +1,6 @@
 /* src/components/devices/DeviceDetails.css */
 
+
 .device-details-page {
   min-height: 100vh;
   position: relative;
@@ -428,4 +429,316 @@
   color: #ff00d4;
   font-weight: 700;
   margin-top: 0.5rem;
+}
+
+/* Notify Button */
+.notify-btn {
+  margin: 1.5rem 0;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  width: 100%;
+  max-width: 340px;
+  font-size: 1rem;
+}
+
+.notify-btn:not(.subscribed) {
+  background: rgba(0, 240, 255, 0.18);
+  border: 1px solid rgba(0, 240, 255, 0.45);
+  color: #00f0ff;
+}
+
+.notify-btn:not(.subscribed):hover {
+  background: rgba(0, 240, 255, 0.28);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0,240,255,0.2);
+}
+
+.notify-btn.subscribed {
+  background: rgba(0, 255, 157, 0.22);
+  border: 1px solid rgba(0, 255, 157, 0.5);
+  color: #00ff9d;
+}
+
+.notify-btn.subscribed:hover {
+  background: rgba(0, 255, 157, 0.35);
+  transform: translateY(-2px);
+}
+
+/* Optional: Small badge on button when subscribed */
+.notify-btn.subscribed::after {
+  content: '✓';
+  margin-left: 0.5rem;
+  font-size: 1.1rem;
+}
+/* Borrow Request Modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.borrow-modal {
+  background: rgba(18, 12, 38, 0.96);
+  border-radius: 16px;
+  width: 90%;
+  max-width: 540px;
+  padding: 2rem;
+  border: 1px solid rgba(0,240,255,0.35);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 0 40px rgba(0,240,255,0.3);
+  color: #f0f4ff;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.8rem;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.6rem;
+}
+
+.close-modal-btn {
+  background: none;
+  border: none;
+  color: #ff3366;
+  cursor: pointer;
+  font-size: 1.5rem;
+}
+
+.borrow-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-group label {
+  color: #b0e0ff;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.form-group input[type="date"],
+.form-group input[type="text"],
+.form-group textarea {
+  width: 100%;
+  padding: 0.9rem 1.1rem;
+  background: rgba(0,0,0,0.5);
+  border: 1px solid rgba(0,240,255,0.35);
+  border-radius: 10px;
+  color: white;
+  font-size: 1rem;
+}
+
+.form-group textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.submit-btn {
+  margin-top: 1.2rem;
+  padding: 1rem;
+  background: linear-gradient(90deg, #00ff9d, #00c8ff);
+  color: #000;
+  border: none;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  transition: all 0.3s;
+}
+
+.submit-btn:hover {
+  transform: scale(1.03);
+  box-shadow: 0 10px 25px rgba(0,255,157,0.35);
+}
+/* Borrow Request Modal - Matches your neon/cyberpunk theme */
+.borrow-modal-content {
+  background: rgba(18, 12, 38, 0.96);
+  border-radius: 16px;
+  width: 90%;
+  max-width: 540px;
+  padding: 2rem;
+  border: 1px solid rgba(0, 240, 255, 0.35);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 0 40px rgba(0, 240, 255, 0.25);
+  color: #f0f4ff;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.8rem;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.6rem;
+  color: #00f0ff;
+}
+
+.device-name-highlight {
+  color: #c300ff;
+  font-weight: 700;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: #ff3366;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.close-btn:hover {
+  color: #ff6699;
+}
+
+.form-error {
+  background: rgba(255, 51, 102, 0.2);
+  color: #ff6699;
+  padding: 0.8rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  border: 1px solid rgba(255, 51, 102, 0.4);
+}
+
+.borrow-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-group label {
+  color: #b0e0ff;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.form-group input[type="date"],
+.form-group input[type="text"],
+.form-group textarea {
+  width: 100%;
+  padding: 0.9rem 1.1rem;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(0, 240, 255, 0.35);
+  border-radius: 10px;
+  color: white;
+  font-size: 1rem;
+  transition: all 0.3s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #00f0ff;
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.4);
+}
+
+.form-group textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.submit-request-btn {
+  margin-top: 1.2rem;
+  padding: 1rem;
+  background: linear-gradient(90deg, #00f0ff, #c300ff);
+  color: #000;
+  border: none;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  transition: all 0.3s;
+}
+
+.submit-request-btn:hover {
+  transform: scale(1.03);
+  box-shadow: 0 0 25px rgba(195, 0, 255, 0.6);
+}
+
+/* Scrollable form container - only vertical scroll */
+.form-scroll-container {
+  max-height: 65vh;                   /* ← adjust this value based on your screen sizes */
+  overflow-y: auto;                   /* scroll only vertically */
+  overflow-x: hidden;                 /* no horizontal scroll */
+  padding-right: 8px;                 /* prevent content shift when scrollbar appears */
+  scrollbar-width: thin;              /* Firefox */
+  scrollbar-color: rgba(0, 240, 255, 0.4) rgba(0, 0, 0, 0.3); /* Firefox */
+}
+
+/* Webkit browsers (Chrome, Safari, Edge) - hidden by default, appears on hover/touch */
+.form-scroll-container::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+  background: transparent;
+}
+
+.form-scroll-container::-webkit-scrollbar-thumb {
+  background: rgba(0, 240, 255, 0.3);
+  border-radius: 10px;
+  transition: background 0.2s;
+}
+
+.form-scroll-container:hover::-webkit-scrollbar-thumb,
+.form-scroll-container:active::-webkit-scrollbar-thumb {
+  background: rgba(195, 0, 255, 0.6);  /* neon purple glow on interaction */
+}
+
+/* When scrolling actively (mobile touch) */
+.form-scroll-container::-webkit-scrollbar-thumb:active {
+  background: #c300ff;                /* bright purple when dragging */
+}
+
+/* Ensure form content doesn't get cut off */
+.borrow-form {
+  padding-bottom: 1rem;               /* breathing room at bottom */
+}
+
+/* Optional: fade edges when scrollable */
+.form-scroll-container::before,
+.form-scroll-container::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 12px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.form-scroll-container::before {
+  top: 0;
+  background: linear-gradient(to bottom, rgba(18,12,38,0.9), transparent);
+}
+
+.form-scroll-container::after {
+  bottom: 0;
+  background: linear-gradient(to top, rgba(18,12,38,0.9), transparent);
 }

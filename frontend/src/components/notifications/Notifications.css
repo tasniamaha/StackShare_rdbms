@@ -231,3 +231,53 @@
     justify-content: flex-end;
   }
 }
+
+/* Notification type colors & icons */
+.type-indicator {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 1.2rem;
+  flex-shrink: 0;
+  color: white;
+}
+
+.notification-item.unread .type-indicator {
+  box-shadow: 0 0 12px currentColor;
+}
+
+/* Device available notification */
+.notification-item .type-indicator[data-type="device_available"] {
+  background: #00ff9d;
+}
+
+/* Clear All button */
+.clear-all-btn {
+  padding: 0.7rem 1.4rem;
+  background: rgba(255,51,102,0.18);
+  border: 1px solid #ff3366;
+  color: #ff3366;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s;
+}
+
+.clear-all-btn:hover {
+  background: rgba(255,51,102,0.28);
+}
+
+/* Empty state enhancement */
+.empty-state {
+  text-align: center;
+  padding: 6rem 1rem;
+  color: #b0e0ff;
+}
+
+.empty-state svg {
+  opacity: 0.6;
+  margin-bottom: 1.5rem;
+}

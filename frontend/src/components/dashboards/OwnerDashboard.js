@@ -26,6 +26,7 @@ import {
 import { useAuth } from '../../context/AuthContext';
 
 import './OwnerDashboard.css';
+import bgImage from "../../assets/image/owner_dashboard.jpg";
 
 export default function OwnerDashboard() {
   const navigate = useNavigate();
@@ -259,7 +260,10 @@ const newPhotos = files.map(file => ({
 
   return (
     <div className="owner-dashboard">
-      <div className="bg-image-layer"></div>
+     <div
+  className="bg-image-layer"
+  style={{ backgroundImage: `url(${bgImage})` }}
+></div>
       <div className="bg-overlay-gradient"></div>
       <div className="bg-grid-lines"></div>
 

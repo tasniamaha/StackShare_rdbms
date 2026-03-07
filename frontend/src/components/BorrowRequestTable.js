@@ -10,10 +10,13 @@ const BorrowRequestTable = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Track loading state per request/action to prevent double-clicks
+  const [actionLoading, setActionLoading] = useState({});
+
   // Fetch pending borrow requests
   const fetchRequests = async () => {
     try {
-      const token = localStorage.getItem("stackshare_token"); // Updated key name
+      const token = localStorage.getItem("stackshare_token");
       if (!token) throw new Error("No authentication token found");
 
       const res = await axios.get("http://localhost:5000/api/borrow/pending", {
@@ -39,24 +42,34 @@ const BorrowRequestTable = () => {
   const handleApprove = async (borrow_id) => {
     if (!window.confirm("Approve this borrow request?")) return;
 
+    setActionLoading(prev => ({ ...prev, [borrow_id]: 'approve' }));
+
     try {
       const token = localStorage.getItem("stackshare_token");
       await axios.put(
         `http://localhost:5000/api/borrow/approve/${borrow_id}`,
-        { approved_by: 1 }, // You may want to send real admin ID later
+        { approved_by: 1 }, // Replace with real admin/user ID later
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      fetchRequests(); // Refresh
+
+      // Success feedback
+      alert("Request has been approved — the borrower will be notified of the update!");
+
+      fetchRequests(); // Refresh list
     } catch (err) {
       console.error("Error approving:", err);
-      alert("Failed to approve request");
+      alert(err.response?.data?.message || "Failed to approve request");
+    } finally {
+      setActionLoading(prev => ({ ...prev, [borrow_id]: null }));
     }
   };
 
   const handleReject = async (borrow_id) => {
     if (!window.confirm("Reject this borrow request?")) return;
+
+    setActionLoading(prev => ({ ...prev, [borrow_id]: 'reject' }));
 
     try {
       const token = localStorage.getItem("stackshare_token");
@@ -67,10 +80,16 @@ const BorrowRequestTable = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      fetchRequests(); // Refresh
+
+      // Success feedback
+      alert("Request has been rejected — the borrower will be notified of the update!");
+
+      fetchRequests(); // Refresh list
     } catch (err) {
       console.error("Error rejecting:", err);
-      alert("Failed to reject request");
+      alert(err.response?.data?.message || "Failed to reject request");
+    } finally {
+      setActionLoading(prev => ({ ...prev, [borrow_id]: null }));
     }
   };
 
@@ -86,6 +105,7 @@ const BorrowRequestTable = () => {
   if (error) {
     return (
       <div className="brt-error">
+        <AlertCircle size={32} />
         <p>{error}</p>
         <button className="brt-retry-btn" onClick={fetchRequests}>
           Try Again
@@ -121,45 +141,65 @@ const BorrowRequestTable = () => {
               </tr>
             </thead>
             <tbody>
-              {requests.map((req) => (
-                <tr key={req.borrow_id}>
-                  <td>{req.student_name || "Unknown"}</td>
-                  <td>{req.device_name || "Unnamed Device"}</td>
-                  <td>
-                    {req.request_date
-                      ? new Date(req.request_date).toLocaleDateString()
-                      : "-"}
-                  </td>
-                  <td>
-                    {req.borrow_start_date
-                      ? new Date(req.borrow_start_date).toLocaleDateString()
-                      : "-"}
-                  </td>
-                  <td>
-                    {req.borrow_end_date
-                      ? new Date(req.borrow_end_date).toLocaleDateString()
-                      : "-"}
-                  </td>
-                  <td className="brt-actions">
-                    <motion.button
-                      className="brt-btn approve"
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => handleApprove(req.borrow_id)}
-                    >
-                      <CheckCircle size={16} /> Approve
-                    </motion.button>
-                    <motion.button
-                      className="brt-btn reject"
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => handleReject(req.borrow_id)}
-                    >
-                      <XCircle size={16} /> Reject
-                    </motion.button>
-                  </td>
-                </tr>
-              ))}
+              {requests.map((req) => {
+                const isApproving = actionLoading[req.borrow_id] === 'approve';
+                const isRejecting = actionLoading[req.borrow_id] === 'reject';
+
+                return (
+                  <tr key={req.borrow_id}>
+                    <td>{req.student_name || "Unknown"}</td>
+                    <td>{req.device_name || "Unnamed Device"}</td>
+                    <td>
+                      {req.request_date
+                        ? new Date(req.request_date).toLocaleDateString()
+                        : "-"}
+                    </td>
+                    <td>
+                      {req.borrow_start_date
+                        ? new Date(req.borrow_start_date).toLocaleDateString()
+                        : "-"}
+                    </td>
+                    <td>
+                      {req.borrow_end_date
+                        ? new Date(req.borrow_end_date).toLocaleDateString()
+                        : "-"}
+                    </td>
+                    <td className="brt-actions">
+                      <motion.button
+                        className="brt-btn approve"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => handleApprove(req.borrow_id)}
+                        disabled={isApproving || isRejecting}
+                      >
+                        {isApproving ? (
+                          <Loader2 size={16} className="spin" />
+                        ) : (
+                          <>
+                            <CheckCircle size={16} /> Approve
+                          </>
+                        )}
+                      </motion.button>
+
+                      <motion.button
+                        className="brt-btn reject"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => handleReject(req.borrow_id)}
+                        disabled={isApproving || isRejecting}
+                      >
+                        {isRejecting ? (
+                          <Loader2 size={16} className="spin" />
+                        ) : (
+                          <>
+                            <XCircle size={16} /> Reject
+                          </>
+                        )}
+                      </motion.button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
