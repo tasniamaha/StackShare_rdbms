@@ -93,10 +93,16 @@ CREATE TABLE waitlist (
     student_id VARCHAR(10) NOT NULL,
     request_time DATETIME DEFAULT CURRENT_TIMESTAMP,
     priority_level INT DEFAULT 0,
-    status ENUM('waiting','notified','offered','expired','fulfilled','cancelled') DEFAULT 'waiting',
-    UNIQUE (device_id, student_id),
-    FOREIGN KEY (device_id) REFERENCES devices(device_id) ON DELETE CASCADE,
-    FOREIGN KEY (student_id) REFERENCES students(student_id) ON DELETE CASCADE
+    status ENUM('waiting', 'notified', 'offered', 'expired', 'fulfilled', 'cancelled') DEFAULT 'waiting',
+    offered_at DATETIME NULL,
+    expires_at DATETIME NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_device_student (device_id, student_id),
+    INDEX idx_device_status_time (device_id, status, request_time),
+    INDEX idx_expires_at (expires_at),
+    FOREIGN KEY (device_id)   REFERENCES devices(device_id)   ON DELETE CASCADE,
+    FOREIGN KEY (student_id)  REFERENCES students(student_id) ON DELETE CASCADE
 );
 
 -- ================================

@@ -283,3 +283,70 @@ DELIMITER ;
 -- Usage:
 CALL get_student_borrow_history('STU001');
 CALL get_student_borrow_history('STU045');
+
+
+DELIMITER $$
+
+CREATE PROCEDURE process_waitlist_next(IN p_device_id INT)
+BEGIN
+    DECLARE v_first_student_id VARCHAR(10);
+    DECLARE v_device_name VARCHAR(100);
+    DECLARE v_owner_id VARCHAR(10);
+    DECLARE v_waitlist_id INT;
+
+    START TRANSACTION;
+
+    -- Find first waiting student (earliest request)
+    SELECT w.student_id, w.waitlist_id
+    INTO v_first_student_id, v_waitlist_id
+    FROM waitlist w
+    WHERE w.device_id = p_device_id
+      AND w.status = 'waiting'
+    ORDER BY w.request_time ASC
+    LIMIT 1
+    FOR UPDATE;
+
+    IF v_first_student_id IS NOT NULL THEN
+        -- Get device & owner info
+        SELECT device_name, owner_id   
+        INTO v_device_name, v_owner_id
+        FROM devices
+        WHERE device_id = p_device_id;
+
+        -- Mark this entry as offered + set expiry (24 hours)
+        UPDATE waitlist
+        SET status = 'offered',
+            offered_at = NOW(),
+            expires_at = DATE_ADD(NOW(), INTERVAL 24 HOUR)
+        WHERE waitlist_id = v_waitlist_id;
+
+        -- Notify requester (first in queue)
+        INSERT INTO notifications (user_id, title, related_entity, related_id, message, notification_type)
+        VALUES (
+            v_first_student_id,
+            'Your Turn! Device Available',
+            'device',
+            p_device_id,
+            CONCAT('The device "', v_device_name, '" is now available. Borrow it within 24 hours or it goes to the next person.'),
+            'waitlist_turn'
+        );
+
+        -- Notify owner
+        INSERT INTO notifications (user_id, title, related_entity, related_id, message, notification_type)
+        VALUES (
+            v_owner_id,
+            'Waitlist User Ready',
+            'device',
+            p_device_id,
+            CONCAT('The first person in waitlist for "', v_device_name, '" can now borrow it.'),
+            'waitlist_ready'
+        );
+
+        -- Optional: temporarily reserve device so no one else grabs it
+        UPDATE devices SET device_status = 'Reserved' WHERE device_id = p_device_id;
+    END IF;
+
+    COMMIT;
+END$$
+
+DELIMITER ;

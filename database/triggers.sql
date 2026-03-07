@@ -273,3 +273,27 @@ BEGIN
     END IF;
 END$$
 DELIMITER ;
+
+DELIMITER $$
+
+CREATE TRIGGER trg_after_device_available
+AFTER UPDATE ON borrow_requests
+FOR EACH ROW
+BEGIN
+    -- Device just became free
+    IF NEW.borrow_status = 'Returned' 
+       AND OLD.borrow_status != 'Returned' THEN
+
+        -- Optional: make sure device is really available
+        UPDATE devices 
+        SET device_status = 'Available'
+        WHERE device_id = NEW.device_id
+          AND device_status != 'Available';
+
+        -- Call procedure to notify next in line
+        CALL process_waitlist_next(NEW.device_id);
+
+    END IF;
+END$$
+
+DELIMITER ;
