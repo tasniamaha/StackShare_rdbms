@@ -46,6 +46,13 @@ router.post('/:id/respond', broadcastController.respondToBroadcast);
 router.put('/:id/accept/:responseId', broadcastController.acceptResponse);
 
 // ================================
+// PUT /api/broadcast/:id/close
+// Requester marks their broadcast as closed/cancelled
+// Same logic as DELETE — maps to cancelBroadcast controller
+// ================================
+router.put('/:id/close', broadcastController.cancelBroadcast);
+
+// ================================
 // DELETE /api/broadcast/:id
 // Only the requester can cancel
 // ================================
