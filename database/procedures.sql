@@ -49,18 +49,17 @@ END$$
 DELIMITER ;
 
 -- ================================
---  approve_borrow_request
+-- approve_borrow_request
 -- Approves a borrow request, sets borrow status, dates, and notifies student
 -- ================================
 DELIMITER $$
-
 CREATE PROCEDURE approve_borrow_request(
-    IN p_borrow_id INT,
+    IN p_borrow_id   INT,
     IN p_approver_id VARCHAR(10)
 )
 BEGIN
-    DECLARE v_device_id INT;
-    DECLARE v_status VARCHAR(20);
+    DECLARE v_device_id  INT;
+    DECLARE v_status     VARCHAR(20);
     DECLARE v_student_id VARCHAR(10);
 
     START TRANSACTION;
@@ -76,26 +75,18 @@ BEGIN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Borrow request is not pending';
     END IF;
-
     UPDATE borrow_requests
-    SET approval_status = 'Approved',
-        borrow_status = 'NotStarted',
-        approved_by = p_approver_id,
-        approved_at = NOW(),
+    SET approval_status   = 'Approved',
+        borrow_status     = 'Borrowed',
+        approved_by       = p_approver_id,
+        approved_at       = NOW(),
         borrow_start_date = CURDATE(),
-        borrow_end_date = DATE_ADD(CURDATE(), INTERVAL 7 DAY)
+        borrow_end_date   = DATE_ADD(CURDATE(), INTERVAL 7 DAY)
     WHERE borrow_id = p_borrow_id;
 
-    UPDATE devices
-    SET device_status = 'Borrowed'
-    WHERE device_id = v_device_id
-      AND device_status = 'Available';
-
-    -- notification removed: handled automatically by trg_notify_borrow_approved trigger
 
     COMMIT;
 END$$
-
 DELIMITER ;
 
 
@@ -156,77 +147,30 @@ BEGIN
 END$$
 DELIMITER ;
 
--- ================================
--- notify_waitlist
--- Notify the next student in waitlist for a device
--- ================================
-DELIMITER $$
-
-CREATE PROCEDURE notify_waitlist(IN p_device_id INT)
-BEGIN
-    DECLARE v_student_id VARCHAR(10);
-
-    -- Pick first waiting student
-    SELECT student_id
-    INTO v_student_id
-    FROM waitlist
-    WHERE device_id = p_device_id
-      AND status = 'waiting'
-    ORDER BY priority_level DESC, request_time ASC
-    LIMIT 1;
-
-    IF v_student_id IS NOT NULL THEN
-
-        -- Reserve the device
-        UPDATE devices
-        SET device_status = 'Reserved'
-        WHERE device_id = p_device_id
-          AND device_status = 'Available';
-
-        -- Offer device to student
-        UPDATE waitlist
-        SET status = 'offered'
-        WHERE device_id = p_device_id
-          AND student_id = v_student_id;
-
-        -- Notify student
-        INSERT INTO notifications(
-            user_id, related_entity, related_id, message, notification_type
-        )
-        VALUES (
-            v_student_id,
-            'waitlist',
-            p_device_id,
-            'You have priority to borrow this device. Please respond within the allowed time.',
-            'fine_issued'
-        );
-
-    END IF;
-END$$
-
-DELIMITER ;
-
 
 -- ================================
 -- process_damage_report
 -- Confirms damage, applies fine, penalizes reputation
 -- ================================
+DROP PROCEDURE IF EXISTS process_damage_report;
+
 DELIMITER $$
 CREATE PROCEDURE process_damage_report(
-    IN p_report_id INT,
+    IN p_report_id    INT,
     IN p_admin_decision ENUM('Borrower_At_Fault','Owner_At_Fault','No_Fault','Split_Cost','Request_More_Info'),
-    IN p_fine_amount DECIMAL(10,2)
+    IN p_fine_amount  DECIMAL(10,2),
+    IN p_admin_id     VARCHAR(10)       -- ← added
 )
 BEGIN
     DECLARE v_accused_student VARCHAR(10);
     DECLARE v_borrow_id INT;
 
-    SELECT accused_student, borrow_id 
+    SELECT accused_student, borrow_id
     INTO v_accused_student, v_borrow_id
     FROM damage_reports
     WHERE report_id = p_report_id;
 
-    -- Step 1: Set to Confirmed first → trg_penalize_reputation fires here
+    -- Step 1: Confirmed → trg_penalize_reputation fires
     UPDATE damage_reports
     SET status = 'Confirmed',
         admin_decision = p_admin_decision,
@@ -234,28 +178,25 @@ BEGIN
         fine_paid = FALSE
     WHERE report_id = p_report_id;
 
-    -- Step 2: Apply fine if borrower is at fault
+    -- Step 2: Apply fine if borrower at fault
     IF p_admin_decision = 'Borrower_At_Fault' AND p_fine_amount > 0 THEN
         CALL apply_fine(
-            v_borrow_id,              -- use variable instead of subquery
+            v_borrow_id,
             v_accused_student,
             'Damage reported and confirmed by admin',
             p_fine_amount,
-            'ADMIN',
+            p_admin_id,        -- ← real student_id now
             DATE_ADD(CURDATE(), INTERVAL 14 DAY)
         );
     END IF;
 
-    -- Step 3: Now mark as Resolved with resolution date
+    -- Step 3: Resolve
     UPDATE damage_reports
     SET status = 'Resolved',
         resolution_date = NOW()
     WHERE report_id = p_report_id;
-
-    -- reputation UPDATE removed — trigger handles it
-
 END$$
-
+DELIMITER ;
 
 DELIMITER $$
 CREATE PROCEDURE get_student_borrow_history(IN p_student_id VARCHAR(10))
@@ -285,18 +226,18 @@ CALL get_student_borrow_history('STU001');
 CALL get_student_borrow_history('STU045');
 
 
-DELIMITER $$
 
+
+DELIMITER $$
 CREATE PROCEDURE process_waitlist_next(IN p_device_id INT)
 BEGIN
     DECLARE v_first_student_id VARCHAR(10);
-    DECLARE v_device_name VARCHAR(100);
-    DECLARE v_owner_id VARCHAR(10);
-    DECLARE v_waitlist_id INT;
+    DECLARE v_device_name      VARCHAR(100);
+    DECLARE v_owner_id         VARCHAR(10);
+    DECLARE v_waitlist_id      INT;
 
-    START TRANSACTION;
+    -- No START TRANSACTION here — caller's transaction wraps this
 
-    -- Find first waiting student (earliest request)
     SELECT w.student_id, w.waitlist_id
     INTO v_first_student_id, v_waitlist_id
     FROM waitlist w
@@ -307,20 +248,20 @@ BEGIN
     FOR UPDATE;
 
     IF v_first_student_id IS NOT NULL THEN
-        -- Get device & owner info
-        SELECT device_name, owner_id   
-        INTO v_device_name, v_owner_id
-        FROM devices
-        WHERE device_id = p_device_id;
 
-        -- Mark this entry as offered + set expiry (24 hours)
+        SELECT device_name INTO v_device_name
+        FROM devices WHERE device_id = p_device_id;
+
+        SELECT owner_id INTO v_owner_id
+        FROM device_owners WHERE device_id = p_device_id LIMIT 1;
+
         UPDATE waitlist
-        SET status = 'offered',
+        SET status     = 'offered',
             offered_at = NOW(),
             expires_at = DATE_ADD(NOW(), INTERVAL 24 HOUR)
         WHERE waitlist_id = v_waitlist_id;
 
-        -- Notify requester (first in queue)
+        -- Notify the student whose turn it is
         INSERT INTO notifications (user_id, title, related_entity, related_id, message, notification_type)
         VALUES (
             v_first_student_id,
@@ -331,22 +272,27 @@ BEGIN
             'waitlist_turn'
         );
 
-        -- Notify owner
-        INSERT INTO notifications (user_id, title, related_entity, related_id, message, notification_type)
-        VALUES (
-            v_owner_id,
-            'Waitlist User Ready',
-            'device',
-            p_device_id,
-            CONCAT('The first person in waitlist for "', v_device_name, '" can now borrow it.'),
-            'waitlist_ready'
-        );
+        -- Notify the owner
+        IF v_owner_id IS NOT NULL THEN
+            INSERT INTO notifications (user_id, title, related_entity, related_id, message, notification_type)
+            VALUES (
+                v_owner_id,
+                'Waitlist User Ready',
+                'device',
+                p_device_id,
+                CONCAT('The first person in the waitlist for "', v_device_name, '" is ready to borrow it.'),
+                'waitlist_ready'
+            );
+        END IF;
 
-        -- Optional: temporarily reserve device so no one else grabs it
         UPDATE devices SET device_status = 'Reserved' WHERE device_id = p_device_id;
+
+    ELSE
+        -- Queue empty — release device back to Available
+        UPDATE devices SET device_status = 'Available' WHERE device_id = p_device_id;
+
     END IF;
 
-    COMMIT;
+    -- No COMMIT here either
 END$$
-
 DELIMITER ;

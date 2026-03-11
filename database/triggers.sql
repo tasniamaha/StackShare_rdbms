@@ -89,7 +89,7 @@ FOR EACH ROW
 BEGIN
     IF NEW.approval_status = 'Approved' AND OLD.approval_status <> 'Approved' THEN
         INSERT INTO notifications(user_id, related_entity, related_id, message, notification_type)
-        VALUES (NEW.student_id, 'borrow_request', NEW.borrow_id, 'Your borrow request has been approved!', 'borrow_request');
+        VALUES (NEW.student_id, 'borrow_request', NEW.borrow_id, 'Your borrow request has been approved!', 'borrow_approved');
     END IF;
 END$$
 DELIMITER ;
@@ -200,19 +200,12 @@ BEGIN
         SET MESSAGE_TEXT = 'Device has already been returned';
     END IF;
 
-    -- 2. Prevent approving an already approved request
-    IF NEW.approval_status = 'Approved' AND OLD.approval_status = 'Approved' THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Borrow request is already approved';
-    END IF;
-
-    -- 3. Auto-set return_date when status changes to Returned
+    -- 2. Auto-set return_date when status changes to Returned
     IF NEW.borrow_status = 'Returned' AND OLD.borrow_status != 'Returned' THEN
         SET NEW.return_date = CURDATE();
     END IF;
 END$$
 DELIMITER ;
-
 --before a damage report is filed, validate the borrow actually exists and is in a returnable state:
 DELIMITER $$
 CREATE TRIGGER trg_before_damage_insert
@@ -283,13 +276,6 @@ BEGIN
     -- Device just became free
     IF NEW.borrow_status = 'Returned' 
        AND OLD.borrow_status != 'Returned' THEN
-
-        -- Optional: make sure device is really available
-        UPDATE devices 
-        SET device_status = 'Available'
-        WHERE device_id = NEW.device_id
-          AND device_status != 'Available';
-
         -- Call procedure to notify next in line
         CALL process_waitlist_next(NEW.device_id);
 

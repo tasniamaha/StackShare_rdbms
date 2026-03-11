@@ -37,7 +37,7 @@ BEGIN
 
         -- 1. Expire this offer
         UPDATE waitlist 
-        SET status = 'expired',
+        SET status = 'waitlist_expired',
             updated_at = NOW()
         WHERE waitlist_id = v_waitlist_id;
 
