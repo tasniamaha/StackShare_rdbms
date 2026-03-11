@@ -131,3 +131,71 @@ exports.getLendHistory = async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+
+// ================================================================
+// ADD THESE TO controllers/ownerController.js
+// ================================================================
+// At the top with other requires, add:
+// const Waitlist = require('../models/Waitlist');
+// ================================================================
+
+// ================================
+// GET /api/owner/devices/:deviceId/waitlist
+// OwnerDashboard — see who is queued for a specific device
+// Only the device owner can see this
+// Shows full queue with position, name, contact, time waiting
+// ================================
+exports.getDeviceWaitlist = async (req, res) => {
+    try {
+        const { deviceId } = req.params;
+        const owner_id     = req.user.student_id;
+
+        // Verify this student actually owns the device
+        const [ownerCheck] = await pool.execute(
+            `SELECT owner_id FROM device_owners
+             WHERE device_id = ? AND owner_id = ?`,
+            [deviceId, owner_id]
+        );
+        if (ownerCheck.length === 0)
+            return res.status(403).json({ message: 'You do not own this device' });
+
+        // Get device info
+        const [deviceRows] = await pool.execute(
+            `SELECT device_name, device_status FROM devices WHERE device_id = ?`,
+            [deviceId]
+        );
+        if (!deviceRows[0])
+            return res.status(404).json({ message: 'Device not found' });
+
+        const waitlist = await Waitlist.findByDevice(deviceId);
+
+        // Add position number and time-in-queue to each entry
+        const queue = waitlist.map((entry, index) => ({
+            position:       index + 1,
+            waitlist_id:    entry.waitlist_id,
+            student_id:     entry.student_id,
+            student_name:   entry.student_name,
+            student_email:  entry.student_email,
+            whatsapp_number: entry.whatsapp_number,
+            status:         entry.status,           // 'waiting' or 'offered'
+            priority_level: entry.priority_level,
+            request_time:   entry.request_time,
+            offered_at:     entry.offered_at || null,
+            expires_at:     entry.expires_at || null,
+            // How long they have been waiting in hours
+            hours_waiting:  Math.round(
+                (new Date() - new Date(entry.request_time)) / (1000 * 60 * 60)
+            )
+        }));
+
+        res.json({
+            device_id:     parseInt(deviceId),
+            device_name:   deviceRows[0].device_name,
+            device_status: deviceRows[0].device_status,
+            total:         queue.length,
+            queue
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
