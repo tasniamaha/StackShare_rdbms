@@ -148,3 +148,80 @@ exports.getFines = async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+// ================================================================
+// CHANGES TO controllers/borrowController.js
+// ================================================================
+// At the top with other requires, add:
+// const Waitlist = require('../models/Waitlist');
+// ================================================================
+
+// ================================
+// POST /api/borrow/request
+// UPDATED createBorrowRequest — handles both normal borrow
+// and waitlist offer claim in one endpoint
+//
+// Flow:
+//   Normal borrow:  device_status = 'Available'
+//   Waitlist claim: device_status = 'Reserved' + student has active offer
+//
+// trg_before_borrow_insert now allows 'Reserved'
+// if the student has an active waitlist offer
+// ================================
+exports.createBorrowRequest = async (req, res) => {
+    try {
+        const { device_id, borrow_start_date, borrow_end_date } = req.body;
+        const student_id = req.user.student_id;
+
+        if (!device_id)
+            return res.status(400).json({ message: 'device_id is required' });
+
+        // Check device status
+        const [deviceRows] = await pool.execute(
+            `SELECT device_status, device_name FROM devices WHERE device_id = ?`,
+            [device_id]
+        );
+        if (!deviceRows[0])
+            return res.status(404).json({ message: 'Device not found' });
+
+        const { device_status, device_name } = deviceRows[0];
+
+        // If device is Reserved, verify student has an active offer
+        // trg_before_borrow_insert does this at DB level too,
+        // but checking here gives a cleaner error message
+        if (device_status === 'Reserved') {
+            const hasOffer = await Waitlist.hasActiveOffer(student_id, device_id);
+            if (!hasOffer) {
+                return res.status(400).json({
+                    message: 'This device is reserved for another student'
+                });
+            }
+        } else if (device_status !== 'Available') {
+            return res.status(400).json({
+                message: `Device is not available for borrowing (status: ${device_status})`
+            });
+        }
+
+        // Create the borrow request
+        // trg_before_borrow_insert validates at DB level
+        const result = await BorrowRequest.create({
+            student_id,
+            device_id,
+            borrow_start_date: borrow_start_date || null,
+            borrow_end_date:   borrow_end_date   || null
+        });
+
+        // If this was a waitlist offer being claimed, mark it fulfilled
+        if (device_status === 'Reserved') {
+            await Waitlist.markFulfilled(device_id, student_id);
+        }
+
+        res.status(201).json({
+            message:    'Borrow request created successfully',
+            borrow_id:  result.insertId,
+            device_name,
+            from_waitlist: device_status === 'Reserved'
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
