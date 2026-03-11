@@ -93,7 +93,7 @@ class ProcedureService {
    */
   static async notifyWaitlist(deviceId) {
     try {
-      await pool.execute('CALL notify_waitlist(?)', [deviceId]);
+      await pool.execute('CALL process_waitlist_next(?)', [deviceId]);
     } catch (err) {
       throw new Error(`notifyWaitlist failed: ${err.message}`);
     }
