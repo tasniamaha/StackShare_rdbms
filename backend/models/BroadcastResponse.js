@@ -46,28 +46,21 @@ class BroadcastResponse {
     return rows;
   }
 
+  // Update response status (generic — used by acceptResponse controller)
+  static async updateStatus(responseId, status) {
+    const query = `UPDATE broadcast_responses SET status = ? WHERE response_id = ?`;
+    const [result] = await pool.execute(query, [status, responseId]);
+    return result;
+  }
+
   // Accept a response
   static async accept(responseId) {
-    const query = `
-      UPDATE broadcast_responses
-      SET status = 'Accepted'
-      WHERE response_id = ?
-    `;
-    
-    const [result] = await pool.execute(query, [responseId]);
-    return result;
+    return await this.updateStatus(responseId, 'Accepted');
   }
 
   // Reject a response
   static async reject(responseId) {
-    const query = `
-      UPDATE broadcast_responses
-      SET status = 'Rejected'
-      WHERE response_id = ?
-    `;
-    
-    const [result] = await pool.execute(query, [responseId]);
-    return result;
+    return await this.updateStatus(responseId, 'Rejected');
   }
 
   // Delete response
