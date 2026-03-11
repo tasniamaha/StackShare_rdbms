@@ -102,10 +102,10 @@ class DamageReport {
     //   Step 3: status = 'Resolved', resolution_date = NOW()
     // Called by: damageController.resolveReport
     // ================================
-    static async resolve(reportId, adminDecision, fineAmount = 0) {
+    static async resolve(reportId, adminDecision, fineAmount = 0, adminId) {
         const [result] = await pool.execute(
-            `CALL process_damage_report(?, ?, ?)`,
-            [reportId, adminDecision, fineAmount]
+            `CALL process_damage_report(?, ?, ?, ?)`,
+            [reportId, adminDecision, fineAmount, adminId]
         );
         return result;
     }
