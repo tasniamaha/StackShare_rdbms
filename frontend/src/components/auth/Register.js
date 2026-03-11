@@ -1,13 +1,12 @@
 // src/components/auth/Register.js
-import { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { setAuth } from '../utils/authStorage'; // your helper
+import { setAuth } from '../utils/authStorage';
 import './Register.css';
 
 const Register = () => {
   const navigate = useNavigate();
-  const location = useLocation();
 
   const [form, setForm] = useState({
     student_id: '',
@@ -15,30 +14,19 @@ const Register = () => {
     student_email: '',
     student_dept: '',
     password: '',
-    role: 'student',         // 'student' or 'admin'
-    subRole: 'borrower',     // only used if role === 'student': 'lender' or 'borrower'
+    role: 'student',   // 'student' or 'admin'
   });
 
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Pre-fill subRole if coming from "Become a Lender" link/button
-  useEffect(() => {
-    const urlParams = new URLSearchParams(location.search);
-    const intent = urlParams.get('intent');
-    if (intent === 'lender') {
-      setForm(prev => ({ ...prev, role: 'student', subRole: 'lender' }));
-    }
-  }, [location.search]);
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: value }));
-    setError(''); // clear error on change
+    setError('');
   };
 
   const validateStudentId = (id) => {
-    // Must be non-empty and start with exactly "2100" for students
     return id.trim().length >= 4 && id.trim().startsWith('2100');
   };
 
@@ -48,51 +36,28 @@ const Register = () => {
     setLoading(true);
 
     try {
-      // Required fields
       if (!form.student_email.trim() || !form.password.trim() || !form.student_id.trim()) {
         throw new Error('Please fill all required fields');
       }
 
-      // Student-specific validation
-      if (form.role === 'student') {
-        if (!form.subRole) {
-          throw new Error('Please select whether you want to be a Lender or Borrower');
-        }
-
-        // Enforce 2100xxxx rule for students
-        if (!validateStudentId(form.student_id)) {
-          throw new Error('Invalid Student ID. Student IDs must start with 2100 (e.g., 21001234)');
-        }
+      if (form.role === 'student' && !validateStudentId(form.student_id)) {
+        throw new Error('Invalid Student ID. Student IDs must start with 2100 (e.g., 21001234)');
       }
 
-      // For admin — no ID format restriction
-
-      // Simulate API call (replace with real fetch/axios later)
       await new Promise(resolve => setTimeout(resolve, 1400));
-
-      console.log('Registration payload:', form);
-
-      // Prepare user object
-      const finalRole = form.role === 'admin' ? 'admin' : form.subRole;
 
       const newUser = {
         student_id: form.student_id.trim(),
         student_name: form.student_name.trim() || null,
         student_email: form.student_email.trim(),
         student_dept: form.student_dept.trim() || null,
-        role: form.role,           // "student" or "admin"
-        subRole: form.role === 'student' ? form.subRole : null,
-        finalRole,                 // computed: "admin", "lender", or "borrower"
+        role: form.role,   // 'student' or 'admin'
       };
 
-      // Save auth (auto-login after registration)
       setAuth('fake-jwt-token-demo', newUser);
 
-      // Redirect based on role
-      if (finalRole === 'admin') {
+      if (form.role === 'admin') {
         navigate('/admin/dashboard', { replace: true });
-      } else if (finalRole === 'lender') {
-        navigate('/owner/dashboard', { replace: true });
       } else {
         navigate('/dashboard', { replace: true });
       }
@@ -136,7 +101,7 @@ const Register = () => {
             <input
               type="text"
               name="student_id"
-              placeholder={form.role === 'student' ? "e.g. 21001234" : "Any format for admin"}
+              placeholder={form.role === 'student' ? 'e.g. 21001234' : 'Any format for admin'}
               value={form.student_id}
               onChange={handleChange}
               required
@@ -200,30 +165,9 @@ const Register = () => {
             <p className="role-hint">
               {form.role === 'admin'
                 ? 'Admins manage the platform, complaints, approvals, etc.'
-                : 'Students can borrow or lend devices within the community.'}
+                : 'Students can both borrow and lend devices within the community.'}
             </p>
           </div>
-
-          {/* Sub-role (only for students) */}
-          {form.role === 'student' && (
-            <div className="form-group sub-role-group">
-              <label>As a student, I want to be a <span className="required">*</span></label>
-              <select
-                name="subRole"
-                value={form.subRole}
-                onChange={handleChange}
-                required
-              >
-                <option value="borrower">Borrower</option>
-                <option value="lender">Lender</option>
-              </select>
-              <p className="role-hint">
-                {form.subRole === 'lender'
-                  ? 'You can list your own devices for others to borrow.'
-                  : 'You can browse and request devices from the community.'}
-              </p>
-            </div>
-          )}
 
           {/* Password */}
           <div className="form-group">
