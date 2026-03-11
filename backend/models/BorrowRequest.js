@@ -128,10 +128,24 @@ class BorrowRequest {
   // Called by: borrowController.approveBorrowRequest
   // ================================
   static async approve(borrowId, approverId) {
-    const [result] = await pool.execute(`CALL approve_borrow_request(?, ?)`, [
-      borrowId,
-      approverId,
-    ]);
+    // Use pool.query() with direct UPDATE instead of stored procedure to avoid
+    // issues with pool.execute() and stored procedures that use START TRANSACTION.
+    // Triggers (trg_device_borrowed, trg_notify_borrow_approved) fire automatically.
+    const [result] = await pool.query(
+      `UPDATE borrow_requests
+       SET approval_status   = 'Approved',
+           borrow_status     = 'Borrowed',
+           approved_by       = ?,
+           approved_at       = NOW(),
+           borrow_start_date = CURDATE(),
+           borrow_end_date   = DATE_ADD(CURDATE(), INTERVAL 7 DAY)
+       WHERE borrow_id       = ?
+         AND approval_status = 'Pending'`,
+      [approverId, borrowId]
+    );
+    if (result.affectedRows === 0) {
+      throw new Error('Borrow request is not pending or does not exist');
+    }
     return result;
   }
 
@@ -141,15 +155,19 @@ class BorrowRequest {
   // ================================
   static async reject(borrowId, approverId) {
     const [result] = await pool.execute(
-      `UPDATE borrow_requests
-             SET approval_status = 'Rejected',
-                 approved_by     = ?,
-                 approved_at     = NOW()
-             WHERE borrow_id = ?`,
-      [approverId, borrowId],
+        `UPDATE borrow_requests
+         SET approval_status = 'Rejected',
+             approved_by     = ?,
+             approved_at     = NOW()
+         WHERE borrow_id       = ?
+           AND approval_status = 'Pending'`,
+        [approverId, borrowId]
     );
+    if (result.affectedRows === 0) {
+        throw new Error('Request is not in pending state');
+    }
     return result;
-  }
+}
 
   // ================================
   // Return device
@@ -251,15 +269,16 @@ class BorrowRequest {
   // ================================
   static async hasActiveOrPending(studentId, deviceId) {
     const [rows] = await pool.execute(
-      `SELECT borrow_id FROM borrow_requests
-             WHERE student_id = ? AND device_id = ?
-               AND (borrow_status IN ('Borrowed','Overdue')
-                    OR approval_status = 'Pending')`,
-      [studentId, deviceId],
+        `SELECT borrow_id FROM borrow_requests
+         WHERE student_id = ? AND device_id = ?
+           AND (
+               borrow_status  IN ('Borrowed','Overdue','NotStarted')
+               OR approval_status = 'Pending'
+           )`,
+        [studentId, deviceId]
     );
     return rows.length > 0;
-  }
-
+}
   // ================================
   // Get all overdue borrows — Admin
   // Called by: borrowController.getOverdueBorrows
@@ -287,7 +306,30 @@ class BorrowRequest {
   // Called by: borrowController.getPendingRequests
   // AdminDashboard approval queue
   // ================================
-  static async getPendingRequests() {
+  // ownerId: if provided, only returns pending requests for that owner's devices
+  // Called from GET /api/borrow/pending with the logged-in user's student_id
+  static async getPendingRequests(ownerId = null) {
+    if (ownerId) {
+      // Filter to owner's own devices
+      const [rows] = await pool.execute(
+        `SELECT br.borrow_id, br.student_id, br.device_id,
+                      br.request_date, br.borrow_start_date, br.borrow_end_date,
+                      br.approval_status,
+                      s.student_name, s.student_email,
+                      s.student_dept, s.reputation_score,
+                      d.device_name, d.device_category
+               FROM borrow_requests br
+               JOIN students s      ON br.student_id  = s.student_id
+               JOIN devices d       ON br.device_id   = d.device_id
+               JOIN device_owners do2 ON d.device_id  = do2.device_id
+               WHERE br.approval_status = 'Pending'
+                 AND do2.owner_id = ?
+               ORDER BY br.request_date ASC`,
+        [ownerId],
+      );
+      return rows;
+    }
+    // Admin: return all pending requests
     const [rows] = await pool.execute(
       `SELECT br.borrow_id, br.student_id, br.device_id,
                     br.request_date, br.borrow_start_date, br.borrow_end_date,
