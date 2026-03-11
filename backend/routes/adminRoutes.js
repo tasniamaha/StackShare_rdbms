@@ -80,4 +80,46 @@ router.get('/complaints/:id',              adminController.getComplaintById);
 // ================================
 router.post('/complaints/:id/decision',    adminController.resolveComplaint);
 
+// ================================
+// GET /api/admin/students
+// List all students with reputation info
+// ================================
+router.get('/students',                    adminController.getAllStudents);
+
+// ================================
+// GET /api/admin/dashboard
+// Combined system stats for AdminDashboard top cards
+// ================================
+router.get('/dashboard',                   adminController.getSystemStats);
+
+// ================================
+// PUT /api/admin/students/:id/restrict
+// Restrict a student from borrowing/lending
+// ================================
+router.put('/students/:id/restrict',       adminController.restrictStudent);
+
+// ================================
+// PUT /api/admin/students/:id/unrestrict
+// Remove restriction from a student
+// ================================
+router.put('/students/:id/unrestrict',     adminController.unrestrictStudent);
+
+// ================================
+// GET /api/admin/audit
+// View audit log (admin only)
+// ================================
+router.get('/audit',                       adminController.getAuditLogs);
+
+// ================================
+// GET /api/admin/student-stats
+// AdminDashboard student reputation table
+// ================================
+router.get('/student-stats',               adminController.getStudentStats);
+
+// ================================
+// GET /api/admin/system-stats
+// AdminDashboard top stat cards
+// ================================
+router.get('/system-stats',                adminController.getSystemStats);
+
 module.exports = router;
