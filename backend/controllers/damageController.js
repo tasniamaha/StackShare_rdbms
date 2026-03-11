@@ -148,14 +148,17 @@ exports.getReportById = async (req, res) => {
 // ================================
 exports.reviewReport = async (req, res) => {
     try {
-        const { id }     = req.params;
-        const { status } = req.body;
+        const { id } = req.params;
 
         if (!id || isNaN(id))
             return res.status(400).json({ message: 'Valid report ID is required' });
 
+        // Default to Under_Review if no status provided — this endpoint's
+        // primary purpose is to mark a report as "being reviewed by admin"
         const validStatuses = ['Reported','Under_Review','Confirmed','Rejected','Resolved'];
-        if (!status || !validStatuses.includes(status))
+        const status = req.body?.status || 'Under_Review';
+
+        if (!validStatuses.includes(status))
             return res.status(400).json({
                 message: `Invalid status. Must be one of: ${validStatuses.join(', ')}`
             });
@@ -188,8 +191,11 @@ exports.reviewReport = async (req, res) => {
 // ================================
 exports.resolveReport = async (req, res) => {
     try {
-        const { id }                   = req.params;
-        const { decision, fine_amount } = req.body;
+        const { id }                        = req.params;
+        const { admin_decision, fine_amount } = req.body;
+
+        // Support both field names: decision (old) and admin_decision (Postman guide)
+        const decision = admin_decision || req.body.decision;
 
         if (!id || isNaN(id))
             return res.status(400).json({ message: 'Valid report ID is required' });
@@ -206,7 +212,58 @@ exports.resolveReport = async (req, res) => {
         if (fine_amount !== undefined && (isNaN(fine_amount) || fine_amount < 0))
             return res.status(400).json({ message: 'fine_amount must be a non-negative number' });
 
-        await DamageReport.resolve(id, decision, fine_amount || 0);
+        const adminId  = req.user.student_id;
+        const amount   = fine_amount || 0;
+
+        // Get report details
+        const [reportRows] = await pool.execute(
+            `SELECT accused_student, borrow_id FROM damage_reports WHERE report_id = ?`,
+            [id]
+        );
+        if (reportRows.length === 0)
+            return res.status(404).json({ message: 'Damage report not found' });
+
+        const { accused_student, borrow_id } = reportRows[0];
+
+        // Step 1: Set Confirmed + decision → fires trg_penalize_reputation (-10 pts)
+        await pool.query(
+            `UPDATE damage_reports
+             SET status         = 'Confirmed',
+                 admin_decision = ?,
+                 fine_amount    = ?,
+                 fine_paid      = FALSE
+             WHERE report_id = ?`,
+            [decision, amount, id]
+        );
+
+        // Step 2: Apply fine if Borrower_At_Fault
+        if (decision === 'Borrower_At_Fault' && amount > 0) {
+            await pool.query(
+                `INSERT INTO fine_reports
+                    (borrow_id, student_id, reason, fine_amount, fine_status, imposed_date, due_date, imposed_by)
+                 VALUES (?, ?, 'Damage reported and confirmed by admin', ?, 'Pending',
+                         NOW(), DATE_ADD(CURDATE(), INTERVAL 14 DAY), ?)`,
+                [borrow_id, accused_student, amount, adminId]
+            );
+
+            // Notify student about the fine
+            await Notification.create({
+                user_id:           accused_student,
+                related_entity:    'damage_report',
+                related_id:        parseInt(id),
+                title:             'Fine Issued',
+                message:           `A fine of ${amount} has been issued for confirmed damage.`,
+                notification_type: 'fine_issued'
+            });
+        }
+
+        // Step 3: Resolve
+        await pool.query(
+            `UPDATE damage_reports
+             SET status = 'Resolved', resolution_date = NOW()
+             WHERE report_id = ?`,
+            [id]
+        );
 
         res.json({ message: 'Damage report resolved successfully' });
     } catch (error) {
