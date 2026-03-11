@@ -215,6 +215,35 @@ exports.updateDeviceStatus = async (req, res) => {
 };
 
 // ================================
+// PATCH /api/devices/:id/availability
+// Owner toggles device between Available / Maintenance
+// Body: { available: true|false }
+// ================================
+exports.toggleAvailability = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { available } = req.body;
+
+    if (available === undefined || available === null) {
+      return res.status(400).json({ message: "available (boolean) is required" });
+    }
+
+    // Ownership check — only the device owner or admin can toggle
+    const isOwner = await DeviceOwner.isOwner(req.user.student_id, id);
+    if (!isOwner && req.user.role !== "admin") {
+      return res.status(403).json({ message: "You do not own this device" });
+    }
+
+    const newStatus = available ? "Available" : "Maintenance";
+    await Device.updateStatus(id, newStatus);
+
+    res.json({ message: `Device availability updated`, device_status: newStatus });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+// ================================
 // DELETE /api/devices/:id  OR  DELETE /api/owner/devices/:id
 // OwnerDashboard delete device button
 // ON DELETE CASCADE handles device_owners cleanup
