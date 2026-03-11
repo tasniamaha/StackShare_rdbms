@@ -16,7 +16,7 @@ class Student {
             password_hash,
             role = 'student',
             can_borrow = true,
-            can_lend = false,
+            can_lend = true,
             whatsapp_number = null
         } = studentData;
 
