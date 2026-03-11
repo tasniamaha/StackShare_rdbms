@@ -52,8 +52,120 @@ exports.login = async (req, res) => {
 };
 
 // ================================
+// GET /api/admin/students
+// ================================
+exports.getAllStudents = async (req, res) => {
+  try {
+    const [students] = await pool.execute(
+      `SELECT student_id, student_name, student_email, student_dept,
+              role, can_borrow, can_lend, is_restricted, has_violations,
+              reputation_score, borrow_status, suspended_until, whatsapp_number
+       FROM students
+       ORDER BY student_name ASC`,
+    );
+    res.json(students);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+// ================================
+// PUT /api/admin/students/:id/restrict
+// ================================
+exports.restrictStudent = async (req, res) => {
+  try {
+    await pool.execute(
+      `UPDATE students SET is_restricted = TRUE, has_violations = TRUE WHERE student_id = ?`,
+      [req.params.id],
+    );
+    res.json({ message: "Student restricted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+// ================================
+// PUT /api/admin/students/:id/unrestrict
+// ================================
+exports.unrestrictStudent = async (req, res) => {
+  try {
+    await pool.execute(
+      `UPDATE students SET is_restricted = FALSE WHERE student_id = ?`,
+      [req.params.id],
+    );
+    res.json({ message: "Student unrestricted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+// ================================
+// GET /api/admin/audit
+// ================================
+exports.getAuditLogs = async (req, res) => {
+  try {
+    const { table_name, action, limit = 100 } = req.query;
+    let query = `SELECT al.*, s.student_name
+                 FROM audit_logs al
+                 LEFT JOIN students s ON al.performed_by = s.student_id`;
+    const params = [];
+    const conditions = [];
+    if (table_name) {
+      conditions.push("al.table_name = ?");
+      params.push(table_name);
+    }
+    if (action) {
+      conditions.push("al.action = ?");
+      params.push(action);
+    }
+    if (conditions.length) query += " WHERE " + conditions.join(" AND ");
+    query += " ORDER BY al.timestamp DESC LIMIT ?";
+    params.push(parseInt(limit));
+    const [rows] = await pool.execute(query, params);
+    res.json(rows);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+// ================================
+// POST /api/admin/audit
+// Manually insert an audit log entry (admin only)
+// Body: { table_name, record_id, action }
+// Note: audit_logs schema has no old_values/new_values columns
+// ================================
+exports.addAuditLog = async (req, res) => {
+  try {
+    const { table_name, record_id, action } = req.body;
+
+    if (!table_name || !action) {
+      return res.status(400).json({ message: "table_name and action are required" });
+    }
+
+    const validActions = ["INSERT", "UPDATE", "DELETE"];
+    if (!validActions.includes(action.toUpperCase())) {
+      return res.status(400).json({ message: `action must be one of: ${validActions.join(", ")}` });
+    }
+
+    await pool.execute(
+      `INSERT INTO audit_logs (table_name, record_id, action, performed_by)
+       VALUES (?, ?, ?, ?)`,
+      [
+        table_name,
+        record_id ? String(record_id) : null,
+        action.toUpperCase(),
+        req.user.student_id,
+      ]
+    );
+
+    res.status(201).json({ message: "Audit log entry created" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+// ================================
 // GET /api/admin/overdue-borrows
-// AdminDashboard overdue panel
 // ================================
 exports.getOverdueBorrows = async (req, res) => {
   try {
@@ -235,7 +347,12 @@ exports.resolveComplaint = async (req, res) => {
       return res.status(400).json({ message: "decision is required" });
     }
 
-    await DamageReport.resolve(req.params.id, decision, fine_amount || 0);
+    await DamageReport.resolve(
+      req.params.id,
+      decision,
+      fine_amount || 0,
+      req.user.student_id,
+    );
     res.json({ message: "Complaint resolved successfully" });
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
