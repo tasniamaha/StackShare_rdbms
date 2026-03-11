@@ -51,7 +51,7 @@ LEFT JOIN students s ON w.student_id = s.student_id;
 CREATE OR REPLACE VIEW view_student_reputation AS
 SELECT s.student_id,
        s.student_name,
-       s.reputation_score,s.is_restricted,s.has_violations,s.borrow_status
+       s.reputation_score, s.is_restricted, s.has_violations, s.borrow_status,
        COUNT(CASE WHEN br.borrow_status = 'Borrowed' THEN 1 END) AS active_borrows,
        COUNT(CASE WHEN br.borrow_status = 'Overdue' THEN 1 END) AS overdue_borrows
 FROM students s
