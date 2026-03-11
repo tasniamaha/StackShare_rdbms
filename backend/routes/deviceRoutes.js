@@ -43,6 +43,29 @@ router.put('/:id',
 );
 
 // ================================
+// PUT /api/devices/:id/status — manually set device_status
+// Admin only (Available / Borrowed / Reserved / Maintenance)
+// Body: { device_status }
+// ================================
+router.put('/:id/status',
+    authMiddleware,
+    roleMiddleware('admin'),
+    deviceController.updateDeviceStatus
+);
+
+// ================================
+// PATCH /api/devices/:id/availability — owner toggles availability
+// Body: { available: true|false }
+// true  → device_status = 'Available'
+// false → device_status = 'Maintenance'
+// ================================
+router.patch('/:id/availability',
+    authMiddleware,
+    roleMiddleware('owner', 'admin'),
+    deviceController.toggleAvailability
+);
+
+// ================================
 // DELETE /api/devices/:id — remove device
 // Owner or admin only
 // ================================
