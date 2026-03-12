@@ -10,12 +10,22 @@ const api = axios.create({
   },
 });
 
-// Attach auth token to every request
+// Attach auth token + dashboard context to every request
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
+  // Match the key used by AuthContext.jsx ("stackshare_token")
+  const token = localStorage.getItem("stackshare_token");
   if (token) {
     config.headers["Authorization"] = `Bearer ${token}`;
   }
+
+  // Send current dashboard context so the backend roleMiddleware
+  // can scope can_borrow / can_lend correctly for this request.
+  // Set via setDashboardContext() in AuthContext when navigating dashboards.
+  const context = localStorage.getItem("stackshare_dashboard_context");
+  if (context) {
+    config.headers["X-Dashboard-Context"] = context;
+  }
+
   return config;
 });
 
@@ -29,9 +39,10 @@ export const logout         = ()     => api.post("/auth/logout");
 // ================================
 // STUDENTS
 // ================================
-export const getStudentById      = (studentId) => api.get(`/students/${studentId}`);
-export const updateStudentProfile= (studentId, data) => api.put(`/students/${studentId}`, data);
-export const getStudentStatus    = (studentId) => api.get(`/students/${studentId}/status`);
+// Note: no /api/students/:id route exists — profile is JWT-scoped
+export const getStudentById      = ()             => api.get('/auth/profile');
+export const updateStudentProfile= (_, data)      => api.put('/auth/profile', data);
+export const getStudentStatus    = (studentId)    => api.get(`/auth/students/${studentId}/status`);
 
 // ================================
 // DEVICES
@@ -40,7 +51,9 @@ export const getAllDevices        = (filters = {}) => api.get("/devices", { para
 export const getDeviceById       = (deviceId)     => api.get(`/devices/${deviceId}`);
 export const addDevice           = (data)          => api.post("/devices", data);
 export const updateDevice        = (deviceId, data)=> api.put(`/devices/${deviceId}`, data);
-export const updateDeviceStatus  = (deviceId, data)=> api.put(`/devices/${deviceId}/status`, data);
+// Note: no PUT /devices/:id/status route exists — use updateDevice (PUT /devices/:id) instead
+export const updateDeviceStatus      = (deviceId, data) => api.put(`/devices/${deviceId}/status`, data);
+export const toggleDeviceAvailability= (deviceId, available) => api.patch(`/devices/${deviceId}/availability`, { available });
 export const deleteDevice        = (deviceId)      => api.delete(`/devices/${deviceId}`);
 
 // ================================
@@ -50,9 +63,9 @@ export const createBorrowRequest    = (data)                  => api.post("/borr
 export const approveBorrowRequest   = (borrowId, approvedBy)  => api.put(`/borrow/approve/${borrowId}`, { approved_by: approvedBy });
 export const rejectBorrowRequest    = (borrowId, approvedBy)  => api.put(`/borrow/reject/${borrowId}`,  { approved_by: approvedBy });
 export const returnDevice           = (borrowId, data)        => api.put(`/borrow/return/${borrowId}`, data);
-export const getBorrowHistory       = (studentId)             => api.get(`/borrow/history/${studentId}`);
-export const getPendingBorrowRequests = ()                    => api.get("/borrow/pending");
-export const getActiveBorrows       = ()                      => api.get("/borrow/active");
+export const getBorrowHistory       = ()                      => api.get('/borrower/history');
+export const getPendingBorrowRequests = ()                    => api.get('/borrow/pending');
+export const getActiveBorrows       = ()                      => api.get('/borrower/active-borrows');
 export const submitBorrowReview     = (borrowId, data)        => api.put(`/borrow/${borrowId}/review`, data);
 
 // ================================
@@ -107,10 +120,11 @@ export const getLendHistory     = ()          => api.get("/owner/lend-history");
 // ================================
 // BROADCAST
 // ================================
-export const createBroadcast     = (data)     => api.post("/broadcast", data);
-export const getAllBroadcasts    = ()          => api.get("/broadcast");
+export const createBroadcast     = (data)     => api.post('/broadcast', data);
+export const getAllBroadcasts    = ()          => api.get('/broadcast');
 export const getBroadcastById    = (id)       => api.get(`/broadcast/${id}`);
 export const respondToBroadcast  = (id, data) => api.post(`/broadcast/${id}/respond`, data);
+// Backend has no /close route — cancellation uses DELETE
 export const closeBroadcast      = (id)       => api.put(`/broadcast/${id}/close`);
 
 // ================================
@@ -133,7 +147,7 @@ export const unrestrictStudent   = (id)        => api.put(`/admin/students/${id}
 // ================================
 // AUDIT LOGS (Admin only)
 // ================================
-export const getAuditLogs = (filters = {}) => api.get("/audit", { params: filters });
-export const addAuditLog  = (data)         => api.post("/audit", data);
+export const getAuditLogs = (filters = {}) => api.get('/admin/audit', { params: filters });
+export const addAuditLog  = (data)         => api.post('/admin/audit', data);
 
 export default api;

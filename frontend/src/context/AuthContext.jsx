@@ -20,20 +20,20 @@ export function AuthProvider({ children }) {
      Helper: Redirect Based On Role
   ====================================================== */
 
-  const redirectByRole = (userData) => {
+  // intent: "lender" → owner dashboard, anything else → default by role
+  const redirectByRole = (userData, intent) => {
     if (!userData?.role) return;
 
-    switch (userData.role) {
-      case "admin":
-        navigate("/admin/dashboard", { replace: true });
-        break;
-      case "owner":
-        navigate("/owner/dashboard", { replace: true });
-        break;
-      case "borrower":
-      default:
-        navigate("/dashboard", { replace: true });
-        break;
+    if (userData.role === "admin") {
+      navigate("/admin/dashboard", { replace: true });
+      return;
+    }
+
+    // Students: go to owner dashboard if they came from "Lend a Device"
+    if (intent === "lender") {
+      navigate("/owner/dashboard", { replace: true });
+    } else {
+      navigate("/dashboard", { replace: true });
     }
   };
 
@@ -59,7 +59,13 @@ export function AuthProvider({ children }) {
       }
 
       setUser(parsedUser);
-      redirectByRole(parsedUser);
+
+      // Only redirect if user landed on / or /login (not if already on a dashboard)
+      const currentPath = window.location.pathname;
+      const publicPaths = ["/", "/login", "/register"];
+      if (publicPaths.includes(currentPath)) {
+        redirectByRole(parsedUser);
+      }
 
     } catch (err) {
       console.error("Auth load error:", err);
@@ -73,14 +79,14 @@ export function AuthProvider({ children }) {
      Login Function
   ====================================================== */
 
-  const login = useCallback((userData, token) => {
+  const login = useCallback((userData, token, intent) => {
     try {
       localStorage.setItem("stackshare_token", token);
       localStorage.setItem("stackshare_user", JSON.stringify(userData));
 
       setUser(userData);
 
-      redirectByRole(userData);
+      redirectByRole(userData, intent);
 
     } catch (err) {
       console.error("Login storage error:", err);
@@ -122,8 +128,13 @@ export function AuthProvider({ children }) {
 
   const isAuthenticated = !!user;
   const isAdmin = user?.role === "admin";
-  const isOwner = user?.role === "owner";
-  const isBorrower = user?.role === "borrower";
+  const isStudent = user?.role === "student";
+
+  // Derived reputation helpers (populated from real API data when wired up)
+  const reputation = user?.reputation_score ?? null;
+  const hasLowReputation = reputation !== null && reputation < 50;
+  const isRestricted = user?.is_restricted ?? false;
+  const hasViolations = user?.has_violations ?? false;
 
   /* =====================================================
      Context Value
@@ -138,8 +149,19 @@ export function AuthProvider({ children }) {
 
     isAuthenticated,
     isAdmin,
-    isOwner,
-    isBorrower
+    isStudent,
+
+    // Keep these for dashboard compatibility
+    isOwner: isStudent,
+    isBorrower: isStudent,
+
+    setDashboardContext: useCallback(() => {}, []),
+    dashboardContext: "both",
+
+    reputation,
+    hasLowReputation,
+    isRestricted,
+    hasViolations,
   };
 
   if (loading) {

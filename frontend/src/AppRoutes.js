@@ -28,12 +28,10 @@ import Recommendations from "./components/dashboards/Recommendations";
 const ProtectedRoute = ({ children, allowedRoles = [] }) => {
   const { isAuthenticated, user } = useAuth();
 
-  // Not logged in
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  // Role restriction
   if (
     allowedRoles.length > 0 &&
     (!user || !allowedRoles.includes(user.role))
@@ -42,26 +40,6 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
   }
 
   return children;
-};
-
-/* =========================================================
-   Role-Based Dashboard Router
-   ========================================================= */
-
-const RoleBasedDashboard = () => {
-  const { user } = useAuth();
-
-  if (!user) return <Navigate to="/login" replace />;
-
-  switch (user.role) {
-    case "admin":
-      return <AdminDashboard />;
-    case "owner":
-      return <OwnerDashboard />;
-    case "borrower":
-    default:
-      return <BorrowerDashboard />;
-  }
 };
 
 /* =========================================================
@@ -77,18 +55,29 @@ const AppRoutes = () => {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
 
-      {/* ================= SMART DASHBOARD ================= */}
+      {/* ================= STUDENT DASHBOARDS ================= */}
 
+      {/* Default dashboard — shows borrow view */}
       <Route
         path="/dashboard"
         element={
-          <ProtectedRoute>
-            <RoleBasedDashboard />
+          <ProtectedRoute allowedRoles={["student", "admin"]}>
+            <BorrowerDashboard />
           </ProtectedRoute>
         }
       />
 
-      {/* ================= EXPLICIT DASHBOARDS ================= */}
+      {/* Owner/lend view — also accessible to all students */}
+      <Route
+        path="/owner/dashboard"
+        element={
+          <ProtectedRoute allowedRoles={["student", "admin"]}>
+            <OwnerDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* ================= ADMIN DASHBOARD ================= */}
 
       <Route
         path="/admin/dashboard"
@@ -99,25 +88,21 @@ const AppRoutes = () => {
         }
       />
 
-      <Route
-        path="/owner/dashboard"
-        element={
-          <ProtectedRoute allowedRoles={["owner", "admin"]}>
-            <OwnerDashboard />
-          </ProtectedRoute>
-        }
-      />
-
       {/* ================= OWNER ACTIONS ================= */}
 
       <Route
         path="/owner/add-device"
         element={
-          <ProtectedRoute allowedRoles={["owner", "admin"]}>
+          <ProtectedRoute allowedRoles={["student", "admin"]}>
             <AddDevice />
           </ProtectedRoute>
         }
       />
+
+      {/* Owner aliases — map to existing pages until dedicated pages are built */}
+      <Route path="/my-devices" element={<ProtectedRoute><DeviceList /></ProtectedRoute>} />
+      <Route path="/lend-history" element={<ProtectedRoute><BorrowHistory /></ProtectedRoute>} />
+      <Route path="/active-lends" element={<ProtectedRoute><BorrowHistory /></ProtectedRoute>} />
 
       {/* ================= DEVICES ================= */}
 
