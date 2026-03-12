@@ -15,7 +15,7 @@ class ProcedureService {
    */
   static async approveBorrowRequest(borrowId, approverId) {
     try {
-      await pool.execute('CALL approve_borrow_request(?, ?)', [borrowId, approverId]);
+      await pool.query('CALL approve_borrow_request(?, ?)', [borrowId, approverId]);
     } catch (err) {
       throw new Error(`approveBorrowRequest failed: ${err.message}`);
     }
@@ -28,7 +28,7 @@ class ProcedureService {
    */
   static async getBorrowHistory(studentId) {
     try {
-      const [rows] = await pool.execute('CALL get_student_borrow_history(?)', [studentId]);
+      const [rows] = await pool.query('CALL get_student_borrow_history(?)', [studentId]);
       return rows[0]; // stored procedures return results in rows[0]
     } catch (err) {
       throw new Error(`getBorrowHistory failed: ${err.message}`);
@@ -48,7 +48,7 @@ class ProcedureService {
    */
   static async applyFine(borrowId, studentId, reason, amount, imposedBy, dueDate) {
     try {
-      await pool.execute(
+      await pool.query(
         'CALL apply_fine(?, ?, ?, ?, ?, ?)',
         [borrowId, studentId, reason, amount, imposedBy, dueDate]
       );
@@ -71,7 +71,7 @@ class ProcedureService {
    */
   static async processDamageReport(reportId, adminDecision, fineAmount) {
     try {
-      await pool.execute(
+      await pool.query(
         'CALL process_damage_report(?, ?, ?)',
         [reportId, adminDecision, fineAmount]
       );
@@ -93,7 +93,7 @@ class ProcedureService {
    */
   static async notifyWaitlist(deviceId) {
     try {
-      await pool.execute('CALL process_waitlist_next(?)', [deviceId]);
+      await pool.query('CALL process_waitlist_next(?)', [deviceId]);
     } catch (err) {
       throw new Error(`notifyWaitlist failed: ${err.message}`);
     }
@@ -111,7 +111,7 @@ class ProcedureService {
    */
   static async assignDeviceOwner(studentId, deviceId) {
     try {
-      await pool.execute('CALL assign_device_owner(?, ?)', [studentId, deviceId]);
+      await pool.query('CALL assign_device_owner(?, ?)', [studentId, deviceId]);
     } catch (err) {
       throw new Error(`assignDeviceOwner failed: ${err.message}`);
     }
@@ -133,7 +133,7 @@ class ProcedureService {
    */
   static async sendReturnReminders() {
     try {
-      await pool.execute('CALL send_return_reminders()');
+      await pool.query('CALL send_return_reminders()');
     } catch (err) {
       throw new Error(`sendReturnReminders failed: ${err.message}`);
     }
