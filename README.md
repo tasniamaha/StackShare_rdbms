@@ -104,8 +104,8 @@ MIT License
 ## ❤️ Acknowledgements
 
 A Relational Database Project by:
-Noshin Syara
-Tasnia Rahman Maha
+Noshin Syara,
+Tasnia Rahman Maha,
 Akbari Madina
 
 ### 🖥 Backend Setup
@@ -130,5 +130,4 @@ npm install
 node server.js
 ```
 
-4. Open your browser and visit:
-   [http://localhost:3000](http://localhost:3000)
+4. Open your browser and visit in your own localhost 
